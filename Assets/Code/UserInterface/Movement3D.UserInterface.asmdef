@@ -1,0 +1,18 @@
+{
+    "name": "Movement3D.UserInterface",
+    "rootNamespace": "Movement3D.UserInterface",
+    "references": [
+        "GUID:f5537676c0c97ce4eb1d3f556efdc3e9",
+        "GUID:111e3e1cf1ddc954ab8a976694f4bf17",
+        "GUID:4d02ae156999b9e47b498aad8340066b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

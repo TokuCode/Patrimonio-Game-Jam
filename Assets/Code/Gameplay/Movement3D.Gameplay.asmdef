@@ -1,0 +1,19 @@
+{
+    "name": "Movement3D.Gameplay",
+    "rootNamespace": "Movement3D.Gameplay",
+    "references": [
+        "GUID:111e3e1cf1ddc954ab8a976694f4bf17",
+        "GUID:4307f53044263cf4b835bd812fc161a4",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:4d02ae156999b9e47b498aad8340066b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
