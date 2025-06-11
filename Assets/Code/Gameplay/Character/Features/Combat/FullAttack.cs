@@ -11,6 +11,9 @@ namespace Movement3D.Gameplay
         public AnimationClip animationClip;
         
         public List<SingleHit> attacks;
+        
+        public bool suckToTarget;
+        public bool chargeAttack;
     }
 
 }

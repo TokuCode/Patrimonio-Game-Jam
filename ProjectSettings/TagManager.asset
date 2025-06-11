@@ -8,6 +8,10 @@ TagManager:
   - Enemy
   - DestroyProp
   - StaticGeo
+  - ImmersiveCam
+  - ExplorationCam
+  - CombatCam
+  - StrategyCam
   layers:
   - Default
   - TransparentFX

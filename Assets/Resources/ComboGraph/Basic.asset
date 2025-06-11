@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a37019ed594d4c73b1f6e2042da6fa7d, type: 3}
+  m_Name: Basic
+  m_EditorClassIdentifier: 
+  nodes:
+  - nodeGuid:
+      Part1: 3596085795
+      Part2: 1276534610
+      Part3: 2528470677
+      Part4: 776288075
+    nodeName: Trivial
+    attacks:
+    - Base
+    position: {x: 352, y: 200}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 2429029386
+      Part2: 1164570968
+      Part3: 2088936123
+      Part4: 1237178596
+    nodeName: ENTRYPOINT
+    attacks: []
+    position: {x: 100, y: 200}
+    isEntryPoint: 1
+  links:
+  - sourceNodeGuid:
+      Part1: 2429029386
+      Part2: 1164570968
+      Part3: 2088936123
+      Part4: 1237178596
+    targetNodeGuid:
+      Part1: 3596085795
+      Part2: 1276534610
+      Part3: 2528470677
+      Part4: 776288075
+    tag: all

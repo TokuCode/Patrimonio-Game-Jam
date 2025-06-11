@@ -139,21 +139,30 @@ namespace Movement3D.Gameplay
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""AttackLight"",
+                    ""name"": ""Attack"",
                     ""type"": ""Button"",
                     ""id"": ""87e761a2-4ee5-41d5-a2a3-c4ebcfa84722"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Tap"",
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""AttackHeavy"",
+                    ""name"": ""Special"",
                     ""type"": ""Button"",
                     ""id"": ""790a07b7-ae03-4580-8998-34e2e53b7891"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Tap"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Hold"",
+                    ""type"": ""Button"",
+                    ""id"": ""d9db7286-0953-46ec-964f-22378207f70d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": ""Hold"",
                     ""initialStateCheck"": false
                 }
             ],
@@ -264,7 +273,29 @@ namespace Movement3D.Gameplay
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""AttackLight"",
+                    ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""15d26db1-6f7f-4e43-a55c-71f50519ebbd"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Hold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c6b77920-8eb9-4fc7-bca1-f324d18318b6"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Hold"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -275,7 +306,7 @@ namespace Movement3D.Gameplay
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""AttackHeavy"",
+                    ""action"": ""Special"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -807,8 +838,9 @@ namespace Movement3D.Gameplay
             m_Gameplay_Jump = m_Gameplay.FindAction("Jump", throwIfNotFound: true);
             m_Gameplay_Run = m_Gameplay.FindAction("Run", throwIfNotFound: true);
             m_Gameplay_Crouch = m_Gameplay.FindAction("Crouch", throwIfNotFound: true);
-            m_Gameplay_AttackLight = m_Gameplay.FindAction("AttackLight", throwIfNotFound: true);
-            m_Gameplay_AttackHeavy = m_Gameplay.FindAction("AttackHeavy", throwIfNotFound: true);
+            m_Gameplay_Attack = m_Gameplay.FindAction("Attack", throwIfNotFound: true);
+            m_Gameplay_Special = m_Gameplay.FindAction("Special", throwIfNotFound: true);
+            m_Gameplay_Hold = m_Gameplay.FindAction("Hold", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -907,8 +939,9 @@ namespace Movement3D.Gameplay
         private readonly InputAction m_Gameplay_Jump;
         private readonly InputAction m_Gameplay_Run;
         private readonly InputAction m_Gameplay_Crouch;
-        private readonly InputAction m_Gameplay_AttackLight;
-        private readonly InputAction m_Gameplay_AttackHeavy;
+        private readonly InputAction m_Gameplay_Attack;
+        private readonly InputAction m_Gameplay_Special;
+        private readonly InputAction m_Gameplay_Hold;
         /// <summary>
         /// Provides access to input actions defined in input action map "Gameplay".
         /// </summary>
@@ -941,13 +974,17 @@ namespace Movement3D.Gameplay
             /// </summary>
             public InputAction @Crouch => m_Wrapper.m_Gameplay_Crouch;
             /// <summary>
-            /// Provides access to the underlying input action "Gameplay/AttackLight".
+            /// Provides access to the underlying input action "Gameplay/Attack".
             /// </summary>
-            public InputAction @AttackLight => m_Wrapper.m_Gameplay_AttackLight;
+            public InputAction @Attack => m_Wrapper.m_Gameplay_Attack;
             /// <summary>
-            /// Provides access to the underlying input action "Gameplay/AttackHeavy".
+            /// Provides access to the underlying input action "Gameplay/Special".
             /// </summary>
-            public InputAction @AttackHeavy => m_Wrapper.m_Gameplay_AttackHeavy;
+            public InputAction @Special => m_Wrapper.m_Gameplay_Special;
+            /// <summary>
+            /// Provides access to the underlying input action "Gameplay/Hold".
+            /// </summary>
+            public InputAction @Hold => m_Wrapper.m_Gameplay_Hold;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -989,12 +1026,15 @@ namespace Movement3D.Gameplay
                 @Crouch.started += instance.OnCrouch;
                 @Crouch.performed += instance.OnCrouch;
                 @Crouch.canceled += instance.OnCrouch;
-                @AttackLight.started += instance.OnAttackLight;
-                @AttackLight.performed += instance.OnAttackLight;
-                @AttackLight.canceled += instance.OnAttackLight;
-                @AttackHeavy.started += instance.OnAttackHeavy;
-                @AttackHeavy.performed += instance.OnAttackHeavy;
-                @AttackHeavy.canceled += instance.OnAttackHeavy;
+                @Attack.started += instance.OnAttack;
+                @Attack.performed += instance.OnAttack;
+                @Attack.canceled += instance.OnAttack;
+                @Special.started += instance.OnSpecial;
+                @Special.performed += instance.OnSpecial;
+                @Special.canceled += instance.OnSpecial;
+                @Hold.started += instance.OnHold;
+                @Hold.performed += instance.OnHold;
+                @Hold.canceled += instance.OnHold;
             }
 
             /// <summary>
@@ -1021,12 +1061,15 @@ namespace Movement3D.Gameplay
                 @Crouch.started -= instance.OnCrouch;
                 @Crouch.performed -= instance.OnCrouch;
                 @Crouch.canceled -= instance.OnCrouch;
-                @AttackLight.started -= instance.OnAttackLight;
-                @AttackLight.performed -= instance.OnAttackLight;
-                @AttackLight.canceled -= instance.OnAttackLight;
-                @AttackHeavy.started -= instance.OnAttackHeavy;
-                @AttackHeavy.performed -= instance.OnAttackHeavy;
-                @AttackHeavy.canceled -= instance.OnAttackHeavy;
+                @Attack.started -= instance.OnAttack;
+                @Attack.performed -= instance.OnAttack;
+                @Attack.canceled -= instance.OnAttack;
+                @Special.started -= instance.OnSpecial;
+                @Special.performed -= instance.OnSpecial;
+                @Special.canceled -= instance.OnSpecial;
+                @Hold.started -= instance.OnHold;
+                @Hold.performed -= instance.OnHold;
+                @Hold.canceled -= instance.OnHold;
             }
 
             /// <summary>
@@ -1298,19 +1341,26 @@ namespace Movement3D.Gameplay
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnCrouch(InputAction.CallbackContext context);
             /// <summary>
-            /// Method invoked when associated input action "AttackLight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// Method invoked when associated input action "Attack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>
             /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-            void OnAttackLight(InputAction.CallbackContext context);
+            void OnAttack(InputAction.CallbackContext context);
             /// <summary>
-            /// Method invoked when associated input action "AttackHeavy" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// Method invoked when associated input action "Special" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>
             /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-            void OnAttackHeavy(InputAction.CallbackContext context);
+            void OnSpecial(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Hold" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnHold(InputAction.CallbackContext context);
         }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

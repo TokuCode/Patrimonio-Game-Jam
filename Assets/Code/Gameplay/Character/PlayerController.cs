@@ -1,4 +1,5 @@
 ﻿using Movement3D.Helpers;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace Movement3D.Gameplay
@@ -19,8 +20,19 @@ namespace Movement3D.Gameplay
         public Transform LookAt => _lookAt;
         [SerializeField] private Transform _cameraReferences;
         public Transform CameraReferences => _cameraReferences;
+        [SerializeField] private Transform _cameraTrackingTarget;
+        public Transform CameraTrackingTarget => _cameraTrackingTarget;
         [SerializeField] private AnimationCurve _suckToTargetEase;
         public AnimationCurve SuckToTargetEase => _suckToTargetEase;
+        
+        private CinemachineCamera _explorerCamera;
+        public CinemachineCamera ExplorerCamera => _explorerCamera;
+        private CinemachineCamera _combatCamera;
+        public CinemachineCamera CombatCamera => _combatCamera;
+        private CinemachineCamera _strategyCamera;
+        public CinemachineCamera StrategyCamera => _strategyCamera;
+        private CinemachineCamera _immersiveCamera;
+        public CinemachineCamera ImmersiveCamera => _immersiveCamera;
         
         
         public CapsuleCollider Capsule { get; private set; }
@@ -38,12 +50,17 @@ namespace Movement3D.Gameplay
         {
             Capsule = GetComponent<CapsuleCollider>();
             Rigidbody = GetComponent<Rigidbody>();
+            _explorerCamera = GameObject.FindGameObjectWithTag("ExplorationCam").GetComponent<CinemachineCamera>();
+            _combatCamera = GameObject.FindGameObjectWithTag("CombatCam").GetComponent<CinemachineCamera>();
+            _strategyCamera = GameObject.FindGameObjectWithTag("StrategyCam").GetComponent<CinemachineCamera>();
+            _immersiveCamera = GameObject.FindGameObjectWithTag("ImmersiveCam").GetComponent<CinemachineCamera>();
             
             SetSingleton();
             if(_isPlayer) _controls = InputReader.Instance;
             Invoker = new Invoker(this);
             
             base.Awake();
+            if(_isPlayer) InputReader.Instance.CacheController(this);
         }
 
         private void SetSingleton()
