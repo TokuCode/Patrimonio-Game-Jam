@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using Movement3D.Helpers;
 using UnityEngine;
@@ -22,11 +23,11 @@ namespace Movement3D.Gameplay
         [SerializeField] private BodyPart[] _bodyParts;
         public Dictionary<string, Transform> _bodyPartsDictionary = new();
 
-        [SerializeField] private string _defaultAttackName;
-        private FullAttack _currentAttack;
-        public FullAttack CurrentAttack => _currentAttack;
         private bool _isAttacking;
         public bool IsAttacking => _isAttacking;
+
+        public event Action OnStartAttack;
+        public event Action OnEndAttack;
         
         [Header("Hit Settings")]
         [SerializeField] private List<string> _targetedTags;
@@ -35,6 +36,7 @@ namespace Movement3D.Gameplay
         public LayerMask AttackLayer => _attackLayer;
         private HitboxPool _hitboxPool;
         private int tick;
+        private FullAttack _currentAttack;
         
         [Header("Visual Effects")]
         [SerializeField] private GameObject _visualEffectPrefab;
@@ -45,6 +47,9 @@ namespace Movement3D.Gameplay
         [SerializeField] private float _defaultTargetRadius;
         [SerializeField] private float _suckToTargetduration;
         [SerializeField] private float _alignDuration;
+        
+        //Extras Variables for Effects
+        private bool waiting;
 
         public override void InitializeFeature(Controller controller)
         {
@@ -59,13 +64,6 @@ namespace Movement3D.Gameplay
         public override void UpdateFeature()
         {
             _hitboxPool.Update(Time.deltaTime);
-        }
-
-        public override void Apply(ref InputPayload @event)
-        {
-            var signal = @event.Signal;
-            
-            if(!string.IsNullOrEmpty(signal)) StartAttack();
         }
 
         private void CacheBodyParts()
@@ -88,20 +86,27 @@ namespace Movement3D.Gameplay
             animator.AttackOverride(attack);
             animator.Attack();
             movement.Block();
-        }
-
-        public void StartAttack()
-        {
-            StartAttack(AttackLibrary.GetAttack(_defaultAttackName));
+            camera.locked = true;
+            
+            OnStartAttack?.Invoke();
         }
 
         public void EndAttack()
         {
             if(!_isAttacking) return;
             
-            _isAttacking = false;
+            if (!_currentAttack.chargeAttack)
+            {
+                _isAttacking = false;
+                _currentAttack = null;
+            }
+            else waiting = true;
+            
             _hitboxPool.OnEndAttack();
             movement.Free();
+            camera.locked = false;
+            
+            OnEndAttack?.Invoke();
         }
 
         public void Tick()
@@ -114,6 +119,8 @@ namespace Movement3D.Gameplay
 
         private void CheckTargetForSnap()
         {
+            if (!_currentAttack.suckToTarget) return;
+            
             float range = Mathf.Max(_minRange, _currentAttack.attackRange);
             var floorPosition = _invoker.FloorPosition.Get();
             
@@ -183,6 +190,15 @@ namespace Movement3D.Gameplay
                 duration = _alignDuration
             });
         }
+
+        public void WaitForReleaseOrInterruption()
+        {
+            if(!waiting || !_currentAttack.chargeAttack) return;
+            waiting = false;
+            
+            _isAttacking = false;
+            _currentAttack = null;
+        }
     }
 
     [Serializable]
@@ -202,8 +218,6 @@ namespace Movement3D.Gameplay
         public int priority; //More priority, less possibility to be canceled and to cancel incoming attacks
         public float damage;
         public Vector2 knockback;
-        
-        //Secondary Effects
         public float stunTime;
         public Vector2 followUp;
     }

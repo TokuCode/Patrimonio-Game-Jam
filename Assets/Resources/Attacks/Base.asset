@@ -27,3 +27,4 @@ MonoBehaviour:
     knockback: {x: 10, y: 15}
     stunTime: 3
     followUp: {x: 2.5, y: 0}
+  suckToTarget: 1

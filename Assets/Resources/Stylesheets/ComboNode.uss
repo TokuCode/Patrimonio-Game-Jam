@@ -1,0 +1,7 @@
+ComboGraphNode #title {
+    background-color: rgb(0, 128, 0);
+}
+
+ListView {
+    flex-grow: 1;
+}

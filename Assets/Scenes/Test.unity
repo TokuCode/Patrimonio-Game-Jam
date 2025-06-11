@@ -2455,7 +2455,7 @@ GameObject:
   - component: {fileID: 77947019}
   m_Layer: 0
   m_Name: Cinemachine Immersive
-  m_TagString: Untagged
+  m_TagString: ImmersiveCam
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2480,8 +2480,8 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 978732132}
-    LookAtTarget: {fileID: 978732131}
+    TrackingTarget: {fileID: 0}
+    LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 1
   Lens:
     FieldOfView: 60
@@ -2951,7 +2951,7 @@ GameObject:
   - component: {fileID: 264536530}
   m_Layer: 0
   m_Name: Cinemachine Combat
-  m_TagString: Untagged
+  m_TagString: CombatCam
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3172,8 +3172,8 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 978732133}
-    LookAtTarget: {fileID: 978732134}
+    TrackingTarget: {fileID: 0}
+    LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 1
   Lens:
     FieldOfView: 45
@@ -3478,7 +3478,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.20106585, y: 8.341586e-15, z: -1.7121747e-15, w: 0.9795777}
+  m_LocalRotation: {x: 0.20106585, y: 8.610049e-15, z: -3.0201066e-15, w: 0.9795777}
   m_LocalPosition: {x: 10, y: 4.25, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3943,6 +3943,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1866019707040607184, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
+      propertyPath: m_Constraints
+      value: 122
+      objectReference: {fileID: 0}
     - target: {fileID: 4285371833805494178, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
       propertyPath: m_Name
       value: Enemy
@@ -6958,26 +6962,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
---- !u!4 &978732131 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4776176366915270329, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
-  m_PrefabInstance: {fileID: 978732130}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &978732132 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2912172735467163510, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
-  m_PrefabInstance: {fileID: 978732130}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &978732133 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8075642077978130723, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
-  m_PrefabInstance: {fileID: 978732130}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &978732134 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2419129285250143723, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
-  m_PrefabInstance: {fileID: 978732130}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &983425776
 GameObject:
   m_ObjectHideFlags: 0
@@ -7338,6 +7322,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1866019707040607184, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
+      propertyPath: m_Constraints
+      value: 122
+      objectReference: {fileID: 0}
     - target: {fileID: 4285371833805494178, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
       propertyPath: m_Name
       value: Enemy (1)
@@ -14645,7 +14633,7 @@ GameObject:
   - component: {fileID: 1502412112}
   m_Layer: 0
   m_Name: Cinemachine Strategy
-  m_TagString: Untagged
+  m_TagString: StrategyCam
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -14866,7 +14854,7 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 978732133}
+    TrackingTarget: {fileID: 0}
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
@@ -14921,7 +14909,7 @@ GameObject:
   - component: {fileID: 1530444339}
   m_Layer: 0
   m_Name: Cinemachine Exploration
-  m_TagString: Untagged
+  m_TagString: ExplorationCam
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -15112,7 +15100,7 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 978732133}
+    TrackingTarget: {fileID: 0}
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
@@ -15415,6 +15403,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1866019707040607184, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
+      propertyPath: m_Constraints
+      value: 122
+      objectReference: {fileID: 0}
     - target: {fileID: 4285371833805494178, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
       propertyPath: m_Name
       value: Enemy (2)
@@ -15983,10 +15975,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 900a354288a54f42acfe8c4cb590e195, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _signals:
-  - light
-  - heavy
-  persistence: 0.16
+  _currentSignal: 
+  persistence: 0.2
 --- !u!4 &1972815055
 Transform:
   m_ObjectHideFlags: 0

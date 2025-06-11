@@ -17,18 +17,17 @@ namespace Movement3D.Gameplay
         private Camera _main;
         private Transform _cameraTransform;
         private FirstPersonCamera immersiveCamera;
-        private Movement movement;
         
         [SerializeField] private CameraStyle _cameraStyle;
         public CameraStyle CurrentCamera => _cameraStyle;
         [SerializeField] private float _rotationSpeed;
         private Vector2 _lastMoveInput;
+        public bool locked;
         
-        [Header("Cinemachine References")]
-        [SerializeField] private CinemachineCamera _exploration;
-        [SerializeField] private CinemachineCamera _combat;
-        [SerializeField] private CinemachineCamera _strategy;
-        [SerializeField] private CinemachineCamera _immersive;
+        private CinemachineCamera _exploration;
+        private CinemachineCamera _combat;
+        private CinemachineCamera _strategy;
+        private CinemachineCamera _immersive;
         
         [Header("Cursor")]
         [SerializeField] private bool _cursorVisible;
@@ -44,10 +43,22 @@ namespace Movement3D.Gameplay
         {
             base.InitializeFeature(controller);
             _dependencies.TryGetFeature(out immersiveCamera);
-            _dependencies.TryGetFeature(out movement);
             _main = Camera.main;
             _cameraTransform = _main?.transform;
-            if (controller is PlayerController playerController) debug = playerController.IsPlayer;
+            if (controller is PlayerController { IsPlayer: true } playerController)
+            {
+                debug = playerController.IsPlayer;
+                _exploration = playerController.ExplorerCamera;
+                _exploration.Follow = playerController.CameraTrackingTarget; 
+                _combat = playerController.CombatCamera;
+                _combat.Follow = playerController.CameraTrackingTarget;
+                _combat.LookAt = playerController.CombatLookAt;
+                _strategy = playerController.StrategyCamera;
+                _strategy.Follow = playerController.CameraTrackingTarget; 
+                _immersive = playerController.ImmersiveCamera;
+                _immersive.Follow = playerController.CameraPosition;
+                _immersive.LookAt = playerController.LookAt;
+            }
         }
 
         private void Start()
@@ -76,7 +87,7 @@ namespace Movement3D.Gameplay
         
         private void RotatePlayer(Vector2 moveDirection)
         {
-            if(movement.IsMovementBlocked) return;
+            if(locked) return;
             
             if(moveDirection != Vector2.zero) _lastMoveInput = moveDirection;
 

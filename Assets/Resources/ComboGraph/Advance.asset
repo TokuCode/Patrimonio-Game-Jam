@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a37019ed594d4c73b1f6e2042da6fa7d, type: 3}
+  m_Name: Advance
+  m_EditorClassIdentifier: 
+  nodes:
+  - nodeGuid:
+      Part1: 1152681974
+      Part2: 1111356290
+      Part3: 1916781442
+      Part4: 1508130250
+    nodeName: ENTRYPOINT
+    attacks: []
+    position: {x: 100, y: 200}
+    isEntryPoint: 1
+  - nodeGuid:
+      Part1: 4066939458
+      Part2: 1227844376
+      Part3: 583885465
+      Part4: 3290340406
+    nodeName: Charge
+    attacks:
+    - Base
+    position: {x: 600, y: -64}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 1973643731
+      Part2: 1252435956
+      Part3: 3089381254
+      Part4: 705566051
+    nodeName: Base
+    attacks:
+    - Base
+    - Base
+    position: {x: 355, y: 243}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 336498017
+      Part2: 1152212981
+      Part3: 3326854045
+      Part4: 3760268301
+    nodeName: Up Follow
+    attacks:
+    - Base
+    position: {x: 677, y: 268}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 1399188732
+      Part2: 1127666630
+      Part3: 2110772127
+      Part4: 2536127667
+    nodeName: Jump Attack
+    attacks:
+    - Base
+    - Base
+    position: {x: 355, y: 483}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 1314695316
+      Part2: 1313478539
+      Part3: 3184502443
+      Part4: 2622257559
+    nodeName: Air Follow
+    attacks:
+    - Base
+    position: {x: 651, y: 483}
+    isEntryPoint: 0
+  links:
+  - sourceNodeGuid:
+      Part1: 1152681974
+      Part2: 1111356290
+      Part3: 1916781442
+      Part4: 1508130250
+    targetNodeGuid:
+      Part1: 1973643731
+      Part2: 1252435956
+      Part3: 3089381254
+      Part4: 705566051
+    tag: attack
+  - sourceNodeGuid:
+      Part1: 4066939458
+      Part2: 1227844376
+      Part3: 583885465
+      Part4: 3290340406
+    targetNodeGuid:
+      Part1: 1973643731
+      Part2: 1252435956
+      Part3: 3089381254
+      Part4: 705566051
+    tag: attack-release
+  - sourceNodeGuid:
+      Part1: 1973643731
+      Part2: 1252435956
+      Part3: 3089381254
+      Part4: 705566051
+    targetNodeGuid:
+      Part1: 4066939458
+      Part2: 1227844376
+      Part3: 583885465
+      Part4: 3290340406
+    tag: attack-charge
+  - sourceNodeGuid:
+      Part1: 1973643731
+      Part2: 1252435956
+      Part3: 3089381254
+      Part4: 705566051
+    targetNodeGuid:
+      Part1: 336498017
+      Part2: 1152212981
+      Part3: 3326854045
+      Part4: 3760268301
+    tag: attack-neutral-up
+  - sourceNodeGuid:
+      Part1: 1152681974
+      Part2: 1111356290
+      Part3: 1916781442
+      Part4: 1508130250
+    targetNodeGuid:
+      Part1: 1399188732
+      Part2: 1127666630
+      Part3: 2110772127
+      Part4: 2536127667
+    tag: attack-all-air
+  - sourceNodeGuid:
+      Part1: 1399188732
+      Part2: 1127666630
+      Part3: 2110772127
+      Part4: 2536127667
+    targetNodeGuid:
+      Part1: 1314695316
+      Part2: 1313478539
+      Part3: 3184502443
+      Part4: 2622257559
+    tag: attack

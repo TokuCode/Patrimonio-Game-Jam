@@ -51,21 +51,30 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "AttackLight",
+                    "name": "Attack",
                     "type": "Button",
                     "id": "87e761a2-4ee5-41d5-a2a3-c4ebcfa84722",
                     "expectedControlType": "",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Tap",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "AttackHeavy",
+                    "name": "Special",
                     "type": "Button",
                     "id": "790a07b7-ae03-4580-8998-34e2e53b7891",
                     "expectedControlType": "",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Tap",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Hold",
+                    "type": "Button",
+                    "id": "d9db7286-0953-46ec-964f-22378207f70d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "Hold",
                     "initialStateCheck": false
                 }
             ],
@@ -176,7 +185,29 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "AttackLight",
+                    "action": "Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "15d26db1-6f7f-4e43-a55c-71f50519ebbd",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hold",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c6b77920-8eb9-4fc7-bca1-f324d18318b6",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Hold",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -187,7 +218,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "AttackHeavy",
+                    "action": "Special",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

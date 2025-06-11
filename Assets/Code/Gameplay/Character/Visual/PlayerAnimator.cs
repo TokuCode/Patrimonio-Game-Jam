@@ -1,5 +1,4 @@
-﻿using Movement3D.Helpers;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Movement3D.Gameplay
 {
