@@ -28,7 +28,7 @@ MonoBehaviour:
     stunTime: 0.5
     vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   followUp: 1
-  suckToTarget: 0
+  suckToTarget: 1
   chargeAttack: 0
   chargeMultiplier: 0
   chargeTime: 0

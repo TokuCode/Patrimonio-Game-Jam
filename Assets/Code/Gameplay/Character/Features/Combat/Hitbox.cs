@@ -48,9 +48,9 @@ namespace Movement3D.Gameplay
         public void Init(SingleHit hit)
         {
             _hit = hit;
-            hit.damage *= _attack.MultiplierDamage;
-            hit.knockback *= _attack.MultiplierKnockback;
-            hit.radius *= _attack.MultiplierScale;
+            _hit.damage *= _attack.MultiplierDamage;
+            _hit.knockback *= _attack.MultiplierKnockback;
+            _hit.radius *= _attack.MultiplierScale;
             _vfxPrefab = hit.vfxPrefab;
             _attack._bodyPartsDictionary.TryGetValue(hit.bodyPartName, out _bodyPart);
             _hasHit = false;
@@ -76,7 +76,7 @@ namespace Movement3D.Gameplay
                 string tag = collider.gameObject.tag;
                 
                 if (_excludeTag.Contains(tag) || !_includeTag.Contains(tag)) continue;
-                
+
                 HitEnemy(collider.gameObject.GetComponent<PlayerController>(), position);
                 
                 hit = true;
@@ -94,6 +94,7 @@ namespace Movement3D.Gameplay
             if (enemy == null) return;
             
             enemy.Dependencies.TryGetFeature(out Resource resource);
+            if(resource == null) return;
             resource.Attack(new HitInfo
             {
                 priority = _attack.CurrentAttack.priority,

@@ -187,17 +187,6 @@ MonoBehaviour:
       Part4: 2527464688
     tag: attack-neutral-fall
   - sourceNodeGuid:
-      Part1: 368474492
-      Part2: 1257273771
-      Part3: 1949819308
-      Part4: 3770018956
-    targetNodeGuid:
-      Part1: 3066300186
-      Part2: 1322443571
-      Part3: 2402099887
-      Part4: 3263768809
-    tag: attack-release-all
-  - sourceNodeGuid:
       Part1: 1529005058
       Part2: 1159353355
       Part3: 524654758
@@ -208,3 +197,14 @@ MonoBehaviour:
       Part3: 2402099887
       Part4: 3263768809
     tag: attack-release-all
+  - sourceNodeGuid:
+      Part1: 368474492
+      Part2: 1257273771
+      Part3: 1949819308
+      Part4: 3770018956
+    targetNodeGuid:
+      Part1: 3066300186
+      Part2: 1322443571
+      Part3: 2402099887
+      Part4: 3263768809
+    tag: next

@@ -12,7 +12,8 @@ namespace Movement3D.Gameplay
             Crouching,
             Running,
             Blocked,
-            Dashing
+            Dashing,
+            Charging
         }
         
         private Crouch crouch;
@@ -54,6 +55,10 @@ namespace Movement3D.Gameplay
         
         [Header("Dashing")]
         [SerializeField] private float _dashMaxSpeed;
+        
+        [Header("Charging")]
+        [SerializeField] private float _chargeMaxSpeed;
+        [SerializeField] private float _chargeAcceleration;
 
         public override void InitializeFeature(Controller controller)
         {
@@ -114,8 +119,16 @@ namespace Movement3D.Gameplay
             
             else if (attack.IsDashing)
             {
-                _state = State.Running;
+                _state = State.Dashing;
                 _desiredMaxSpeed = _dashMaxSpeed;
+            }
+            
+            else if (attack.Charging)
+            {
+                _state = State.Charging;
+                _desiredMaxSpeed = _chargeMaxSpeed;
+                acceleration = _chargeAcceleration;
+                enableTransition = true;
             }
 
             else if(crouch.IsCrouching)
@@ -123,7 +136,7 @@ namespace Movement3D.Gameplay
                 _state = State.Crouching;
                 
                 _desiredMaxSpeed = _crouchMaxSpeed;
-                acceleration = _crouchMaxSpeed;
+                acceleration = _crouchAcceleration;
                 enableTransition = true;
             }
 

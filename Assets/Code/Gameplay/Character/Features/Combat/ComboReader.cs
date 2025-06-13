@@ -8,6 +8,8 @@ namespace Movement3D.Gameplay
 {
     public class ComboReader : Feature
     {
+        private const string nextKeyword = "next";
+        
         private Attack attack;
         private Resource resource;
         private List<string> bufferSignal;
@@ -47,7 +49,7 @@ namespace Movement3D.Gameplay
 
         public override void UpdateFeature()
         {
-            if(!_locked) _chainTimer.Tick(Time.deltaTime);
+            if(!_locked && !attack.Waiting) _chainTimer.Tick(Time.deltaTime);
         }
 
         public override void Apply(ref InputPayload @event)
@@ -82,9 +84,12 @@ namespace Movement3D.Gameplay
             if (count != layers) return false;
             var temp = transition.Split(InputBuffer.Separator).ToList();
             string all = InputBuffer.AllKeyword;
+            string next = nextKeyword;
 
             for (int i = 0; i < layers && i < temp.Count; i++)
             {
+                if (i == 0 && EQ(temp[i], next)) return true;
+                
                 if(EQ(temp[i],all)) continue;
                 if(!EQ(temp[i], bufferSignal[i])) return false;
             }
@@ -103,7 +108,7 @@ namespace Movement3D.Gameplay
         {
             if(_graph == null || _actualCombo == null) return;
             
-            var transition = _graph.links.First(link => link.sourceNodeGuid == _actualCombo.nodeGuid && string.IsNullOrWhiteSpace(link.tag));
+            var transition = _graph.links.FirstOrDefault(link => link.sourceNodeGuid == _actualCombo.nodeGuid && nextKeyword.Equals(link.tag));
             
             if(transition == null) return;
             

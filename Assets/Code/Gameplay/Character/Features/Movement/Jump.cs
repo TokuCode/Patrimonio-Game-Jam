@@ -114,7 +114,7 @@ namespace Movement3D.Gameplay
         
         private void GravityHandling(bool jumpInput)
         {
-            if (physics.OnGround || physics.OnSlope) return;
+            if (physics.OnGround || physics.OnSlope || attack.IsSuspended) return;
             
             var velocity = _invoker.Velocity.Get();
 

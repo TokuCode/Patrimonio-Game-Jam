@@ -58,6 +58,9 @@ namespace Movement3D.Gameplay
         
         //Extras Variables for Effects
         private bool _waiting;
+        public bool Waiting => _waiting;
+        private bool _charging;
+        public bool Charging => _charging;
         private float _waitTime;
         private float _releaseMultiplier;
 
@@ -79,17 +82,18 @@ namespace Movement3D.Gameplay
         private bool _onPosture;
         public bool OnPosture => _onPosture;
         private CountdownTimer _postureTimer;
+        private Vector3 _lastDirectionToTarget;
 
         public override void InitializeFeature(Controller controller)
         {
             base.InitializeFeature(controller);
-            _releaseMultiplier = 1f;
             _dependencies.TryGetFeature(out movement);
             _dependencies.TryGetFeature(out camera);
             _dependencies.TryGetFeature(out resource);
             _dependencies.TryGetFeature(out physics);
             _dependencies.TryGetFeature(out combo);
             if (controller is PlayerController player) animator = player.Animator;
+            MultiplierReset();
             CacheBodyParts();
             _hitboxPool = new(4, this);
             resource.OnStun += CancelAttack;
@@ -149,6 +153,7 @@ namespace Movement3D.Gameplay
                 _waitTime = Time.time;
                 if(_currentAttack.downAttack) DownAttack();
                 if(_currentAttack.defensePosture) DefensePosture();
+                if(_currentAttack.chargeAttack) _charging = true;
             }
             else
             {
@@ -157,6 +162,7 @@ namespace Movement3D.Gameplay
                 _currentAttack = null;
                 _isSuspended = false;
                 _onPosture = false;
+                _charging = false;
             }
             
             movement.Free();
@@ -177,6 +183,7 @@ namespace Movement3D.Gameplay
             _isDashing = false;
             _isSuspended = false;
             _onPosture = false;
+            _charging = false;
             
             OnEndAttack?.Invoke();
         }
@@ -202,7 +209,7 @@ namespace Movement3D.Gameplay
 
         private void CheckTargetForSnap(FullAttack attack)
         {
-            if (!_currentAttack.suckToTarget) return;
+            _lastDirectionToTarget = Vector3.zero;
             
             float range = Mathf.Max(_minRange, _currentAttack.attackRange);
             var floorPosition = _invoker.FloorPosition.Get();
@@ -296,9 +303,9 @@ namespace Movement3D.Gameplay
             var shootPosition = _bodyPartsDictionary[_currentAttack.attacks[tick].bodyPartName].position + forward * _shootOffset;
             var projectile = ObjectPoolManager.Instance.Get(_currentAttack.projectile, shootPosition, Quaternion.identity).GetComponent<Projectile>();
 
-            bool chain = _currentAttack.chainEffects && tick == _currentAttack.chainTick; 
-            
-            projectile.Init(shootPosition, forward, _currentAttack.priority, this, chain);
+            bool chain = _currentAttack.chainEffects && tick == _currentAttack.chainTick;
+
+            projectile.Init(shootPosition, _lastDirectionToTarget != Vector3.zero ? _lastDirectionToTarget : forward, _currentAttack.priority, this, chain);
         }
 
         private Vector3 GetTargetOutPosition(PlayerController target)
@@ -323,18 +330,17 @@ namespace Movement3D.Gameplay
             var center = _invoker.CenterPosition.Get();
             var distance = (targetCenter - center).With(y: 0).magnitude;
             var directionToTarget = (targetCenter - center).With(y: 0).normalized;
+
+            _invoker.Forward.Execute(directionToTarget);
+            _invoker.PlayerForward.Execute(directionToTarget);
             
             if(distance >= _minRange && attack.suckToTarget) _invoker.SuckToTarget.Execute(new SuckToTargetParams
             {
                 position = GetTargetOutPosition(target),
                 duration = _suckToTargetduration
             });
-
-            _invoker.AlignCamera.Execute(new AlignCameraParams
-            {
-                direction = directionToTarget,
-                duration = _alignDuration
-            });
+            
+            _lastDirectionToTarget = directionToTarget;
         }
 
         public void Interruption(bool success)
@@ -348,6 +354,7 @@ namespace Movement3D.Gameplay
             _isDashing = false;
             _isSuspended = false;
             _onPosture = false;
+            _charging = false;
             _hitboxPool.OnEndAttack();
             animator.Freeze(false);
             
@@ -369,6 +376,7 @@ namespace Movement3D.Gameplay
             _isDashing = false;
             _isSuspended = false;
             _onPosture = false;
+            _charging = false;
             _hitboxPool.OnEndAttack();
             animator.Freeze(false);
             
@@ -384,11 +392,8 @@ namespace Movement3D.Gameplay
         {
             if(physics.OnGround) return;
             
-            var velocity = _invoker.Velocity.Get();
-            if (velocity.y < 0)
-            {
-                _invoker.AddForce.Execute(new(Vector3.up, velocity.y, ForceMode.VelocityChange));
-            }
+            var velocity = _invoker.Velocity.Get().With(y: 0);
+            _invoker.Velocity.Execute(velocity);
             
             _isSuspended = true;
         }

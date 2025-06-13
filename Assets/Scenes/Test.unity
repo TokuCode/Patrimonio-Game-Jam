@@ -3736,7 +3736,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 50
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -3762,8 +3762,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.20106585, y: 8.610049e-15, z: -3.0201066e-15, w: 0.9795777}
-  m_LocalPosition: {x: 10, y: 4.25, z: -5}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 10, y: 1.5, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7260,6 +7260,22 @@ PrefabInstance:
       propertyPath: _shootOffset
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 2754516514064610831, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
+      propertyPath: _multiplierScale
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 2754516514064610831, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
+      propertyPath: _multiplierSpeed
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2754516514064610831, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
+      propertyPath: _multiplierDamage
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2754516514064610831, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
+      propertyPath: _multiplierKnockback
+      value: 0.25
+      objectReference: {fileID: 0}
     - target: {fileID: 4285371833805494178, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
       propertyPath: m_Name
       value: Player
@@ -7303,6 +7319,18 @@ PrefabInstance:
     - target: {fileID: 4541573201513895216, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5110308214082637990, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
+      propertyPath: _chargeMaxSpeed
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5110308214082637990, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
+      propertyPath: _chargeAcceleration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5110308214082637990, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
+      propertyPath: _smoothingThreshold
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6223225375822771747, guid: ae796b345ebfded43b1be9a08ccf6b53, type: 3}
       propertyPath: chainTime

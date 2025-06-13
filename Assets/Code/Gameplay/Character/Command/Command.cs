@@ -393,7 +393,25 @@ namespace Movement3D.Gameplay
             _obj.DOLookAt(_obj.transform.position + args.direction, args.duration);
         }
     }
+    
+    public class AlignCameraAltCommand : ICommand<AlignCameraParams>
+    {
+        private Transform _orientation;
+        private Transform _obj;
 
+        public AlignCameraAltCommand(Transform obj, Transform orientation)
+        {
+            _orientation = orientation;
+            _obj = obj;
+        }
+
+        public void Execute(AlignCameraParams args)
+        {
+            _orientation.LookAt(_orientation.transform.position + args.direction);
+            _obj.LookAt(_obj.transform.position + args.direction);
+        }
+    }
+    
     public class ColliderCenterHandler : ICommand<float>, IRequest<float>
     {
         private CapsuleCollider capsule;

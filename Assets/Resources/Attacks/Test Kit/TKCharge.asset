@@ -16,12 +16,22 @@ MonoBehaviour:
   attackRange: 7.5
   animationClip: {fileID: -203655887218126122, guid: db9920be1be2745488260a22f43349d0, type: 3}
   priority: 20
-  attacks: []
+  attacks:
+  - bodyPartName: right-hand
+    positionOffset: {x: 0, y: 0, z: 0}
+    radius: 0.75
+    tick: 0
+    delay: 0
+    duration: 0.75
+    damage: 25
+    knockback: {x: 4, y: 6}
+    stunTime: 1.5
+    vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   followUp: 0
   suckToTarget: 0
   chargeAttack: 1
-  chargeMultiplier: 3
-  chargeTime: 1.5
+  chargeMultiplier: 1.5
+  chargeTime: 1
   dashAttack: 0
   dashTick: 0
   dashImpulse: 0

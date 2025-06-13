@@ -26,7 +26,7 @@ MonoBehaviour:
     damage: 20
     knockback: {x: 5, y: 2}
     stunTime: 1.5
-    vfxPrefab: {fileID: 0}
+    vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   followUp: 4
   suckToTarget: 0
   chargeAttack: 0

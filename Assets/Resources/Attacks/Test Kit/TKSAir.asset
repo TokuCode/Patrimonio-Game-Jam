@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackName: TKSAir
   attackRange: 5
-  animationClip: {fileID: -4817025317064187039, guid: b0cf3f125eeb6fd4a896b7d1f5630b45, type: 3}
+  animationClip: {fileID: -4581603697754345420, guid: 14c125081a802b74cb9f594b17156397, type: 3}
   priority: 5
   attacks:
   - bodyPartName: left-foot
@@ -48,7 +48,7 @@ MonoBehaviour:
     stunTime: 0.5
     vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   followUp: 0
-  suckToTarget: 0
+  suckToTarget: 1
   chargeAttack: 0
   chargeMultiplier: 0
   chargeTime: 0

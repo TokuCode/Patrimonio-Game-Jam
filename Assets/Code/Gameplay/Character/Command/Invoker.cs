@@ -33,6 +33,7 @@ namespace Movement3D.Gameplay
         public SuckToTargetCommand SuckToTarget { get; }
         public SuckToTargetDOTween SuckToTargetAlt { get; }
         public AlignCameraCommand AlignCamera { get; }
+        public AlignCameraAltCommand AlignCameraAlt { get; }
         public LocalScaleHandler ReferencesLocalScale { get; }
         public ColliderCenterHandler ColliderCenter { get; }
 
@@ -68,6 +69,7 @@ namespace Movement3D.Gameplay
             SuckToTarget = new(_rigidbody, playerController.SuckToTargetEase);
             SuckToTargetAlt = new(Ease.OutSine, _floor, _rigidbody);
             AlignCamera = new(_playerObj, _orientation);
+            AlignCameraAlt = new(_playerObj, _orientation);
             ReferencesLocalScale = new(_camReference);
             ColliderCenter = new(_collider);
         }
