@@ -5,5 +5,6 @@
         void InitializeFeature(Controller controller);
         void UpdateFeature();
         void FixedUpdateFeature();
+        void ResetFeature();
     }
 }

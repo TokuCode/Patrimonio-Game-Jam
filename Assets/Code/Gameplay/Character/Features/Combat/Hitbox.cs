@@ -3,6 +3,7 @@ using System.Linq;
 using Movement3D.Helpers;
 using UnityEngine;
 using UnityEngine.Pool;
+using UnityEngine.TextCore.Text;
 using UnityEngine.VFX;
 
 namespace Movement3D.Gameplay
@@ -20,23 +21,26 @@ namespace Movement3D.Gameplay
         private List<string> _excludeTag;
         private List<string> _includeTag;
         private SingleHit _hit;
-        private VisualEffect _visualEffect;
+        private GameObject _vfxPrefab;
+        private VisualEffect _vfx;
         private bool _hasHit;
         
-        public Hitbox(Attack attack, GameObject visualEffect)
+        public Hitbox(Attack attack)
         {
             _attack = attack;
             _excludeTag = new List<string> { attack.gameObject.tag };
             _includeTag = new List<string>(attack.Targeted);
             _enemyLayer = attack.AttackLayer;
-            _visualEffect = visualEffect.GetComponent<VisualEffect>();
         }
 
         public void Update(float deltaTime)
         {
             if (!active) return;
             _timer.Tick(deltaTime);
+        }
 
+        public void FixedUpdate()
+        {
             float time = _timer.GetTime();
             if (_timer.IsRunning && time >= _hit.delay && time <= _hit.delay + _hit.duration) CheckHit();
         }
@@ -44,8 +48,13 @@ namespace Movement3D.Gameplay
         public void Init(SingleHit hit)
         {
             _hit = hit;
+            _hit.damage *= _attack.MultiplierDamage;
+            _hit.knockback *= _attack.MultiplierKnockback;
+            _hit.radius *= _attack.MultiplierScale;
+            _vfxPrefab = hit.vfxPrefab;
             _attack._bodyPartsDictionary.TryGetValue(hit.bodyPartName, out _bodyPart);
             _hasHit = false;
+            if(_attack.CurrentAttack.chargeAttack || _attack.CurrentAttack.defensePosture) AttackVFX();
         }
 
         public Vector3 GetPosition()
@@ -67,8 +76,8 @@ namespace Movement3D.Gameplay
                 string tag = collider.gameObject.tag;
                 
                 if (_excludeTag.Contains(tag) || !_includeTag.Contains(tag)) continue;
-                
-                //Hit Logic
+
+                HitEnemy(collider.gameObject.GetComponent<PlayerController>(), position);
                 
                 hit = true;
             }
@@ -76,21 +85,34 @@ namespace Movement3D.Gameplay
             if (hit && !_hasHit)
             {
                 _hasHit = true;
-                OnHit(position);
+                OnHit();
             }
         }
 
-        public void AttackVFX(Vector3 position)
+        public void HitEnemy(PlayerController enemy, Vector3 position)
         {
-            //Vfx Logic
-            _visualEffect.Reinit();
-            _visualEffect.SetVector3("Position", position);
-            _visualEffect.Play();
+            if (enemy == null) return;
+            
+            enemy.Dependencies.TryGetFeature(out Resource resource);
+            if(resource == null) return;
+            resource.Attack(new HitInfo
+            {
+                priority = _attack.CurrentAttack.priority,
+                hit = _hit,
+                position = position,
+                success = true,
+                projectile = false
+            });
         }
 
-        public void OnHit(Vector3 position)
+        public void AttackVFX()
         {
-            AttackVFX(position);
+            if(_vfxPrefab != null) _vfx = VFXPool.Instance.Get(_vfxPrefab, GetPosition());
+        }
+
+        public void OnHit()
+        {
+            AttackVFX();
         }
 
         public void OnGet()
@@ -106,7 +128,9 @@ namespace Movement3D.Gameplay
             _timer.Stop();
             active = false;
             _bodyPart = null;
-            _visualEffect.Stop();
+            if(_vfxPrefab != null && _vfx != null && _vfx.gameObject.activeSelf) VFXPool.Instance.Return(_vfx, _vfxPrefab);
+            _vfx = null;
+            _vfxPrefab = null;
         }
 
         public void OnAttackTick(int tick)
@@ -123,13 +147,15 @@ namespace Movement3D.Gameplay
     {
         private ObjectPool<Hitbox> _hitboxPool;
         private List<Hitbox> _activeHitboxes = new();
+        private Attack _attack;
         
-        public HitboxPool(int prewarm, Attack attack, GameObject _vfx)
+        public HitboxPool(int prewarm, Attack attack)
         {
+            _attack = attack;
+            
             Hitbox CreateFunc()
             {
-                var vfx = GameObject.Instantiate(_vfx, Vector3.zero, Quaternion.identity);
-                return new Hitbox(attack, vfx);
+                return new Hitbox(attack);
             }
 
             void OnGet(Hitbox hitbox)
@@ -172,13 +198,21 @@ namespace Movement3D.Gameplay
             _activeHitboxes.ForEach(hitbox => hitbox.Update(deltaTime));
         }
 
+        public void FixedUpdate()
+        {
+            _activeHitboxes.ForEach(hitbox => hitbox.FixedUpdate());
+        }
+
         public void OnStartAttack(List<SingleHit> hits)
         {
+            if(hits.Count == 0) return;
+            
             foreach (var hit in hits)
             {
                 var hitbox = GetHit(hit);
                 _activeHitboxes.Add(hitbox);
             }
+            _attack.MultiplierReset();
         }
 
         public void OnEndAttack()

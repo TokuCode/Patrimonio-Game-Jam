@@ -7,8 +7,10 @@ using UnityEngine;
 
 namespace Movement3D.Gameplay
 {
-    public class Attack : Feature
+    public class Attack : Feature, IProcess<HitInfo>
     {
+        private const int postureDefensiveMaxSpan = 10;
+        
         [Serializable]
         public struct BodyPart
         {
@@ -19,6 +21,9 @@ namespace Movement3D.Gameplay
         private Movement movement;
         private ThirdPersonCamera camera;
         private PlayerAnimator animator;
+        private Resource resource;
+        private PhysicsCheck physics;
+        private ComboReader combo;
         
         [SerializeField] private BodyPart[] _bodyParts;
         public Dictionary<string, Transform> _bodyPartsDictionary = new();
@@ -37,9 +42,7 @@ namespace Movement3D.Gameplay
         private HitboxPool _hitboxPool;
         private int tick;
         private FullAttack _currentAttack;
-        
-        [Header("Visual Effects")]
-        [SerializeField] private GameObject _visualEffectPrefab;
+        public FullAttack CurrentAttack => _currentAttack;
 
         [Header("Suck To Target Settings")] 
         [SerializeField] private float _aimAngle;
@@ -47,23 +50,69 @@ namespace Movement3D.Gameplay
         [SerializeField] private float _defaultTargetRadius;
         [SerializeField] private float _suckToTargetduration;
         [SerializeField] private float _alignDuration;
+        [SerializeField] private LayerMask _solid;
+
+        [Header("Aim Distance Calculation")]
+        [SerializeField] private float _aimAngleWeight;
+        [SerializeField] private float _aimRadiusWeight;
         
         //Extras Variables for Effects
-        private bool waiting;
+        private bool _waiting;
+        public bool Waiting => _waiting;
+        private bool _charging;
+        public bool Charging => _charging;
+        private float _waitTime;
+        private float _releaseMultiplier;
+
+        [Header("Tuning Settings")]
+        [SerializeField] private float _shootOffset;
+        [SerializeField] private float _multiplierScale; 
+        public float MultiplierScale => _multiplierScale * (_releaseMultiplier - 1) + 1;
+        [SerializeField] private float _multiplierDamage; 
+        public float MultiplierDamage => _multiplierDamage + (_releaseMultiplier - 1) + 1;
+        [SerializeField] private float _multiplierKnockback; 
+        public float MultiplierKnockback => _multiplierKnockback + (_releaseMultiplier - 1) + 1;
+        [SerializeField] private float _multiplierSpeed; 
+        public float MultiplierSpeed => _multiplierSpeed * (_releaseMultiplier - 1) + 1;
+        
+        private bool _isDashing;
+        public bool IsDashing => _isDashing;
+        private bool _isSuspended;
+        public bool IsSuspended => _isSuspended;
+        private bool _onPosture;
+        public bool OnPosture => _onPosture;
+        private CountdownTimer _postureTimer;
+        private Vector3 _lastDirectionToTarget;
 
         public override void InitializeFeature(Controller controller)
         {
             base.InitializeFeature(controller);
             _dependencies.TryGetFeature(out movement);
             _dependencies.TryGetFeature(out camera);
+            _dependencies.TryGetFeature(out resource);
+            _dependencies.TryGetFeature(out physics);
+            _dependencies.TryGetFeature(out combo);
             if (controller is PlayerController player) animator = player.Animator;
+            MultiplierReset();
             CacheBodyParts();
-            _hitboxPool = new(4, this, _visualEffectPrefab);
+            _hitboxPool = new(4, this);
+            resource.OnStun += CancelAttack;
+            _postureTimer = new(1);
+            _postureTimer.OnTimerStop += () => { Interruption(false); };
+            resource.pipeline.Register(this);
         }
 
         public override void UpdateFeature()
         {
+            _postureTimer.Tick(Time.deltaTime);
             _hitboxPool.Update(Time.deltaTime);
+        }
+
+        public override void FixedUpdateFeature()
+        {
+            Dash();
+            WaitForGround();
+            _hitboxPool.FixedUpdate();
         }
 
         private void CacheBodyParts()
@@ -82,31 +131,69 @@ namespace Movement3D.Gameplay
             _currentAttack = attack;
             _hitboxPool.OnStartAttack(attack.attacks);
             tick = 0;
-            if(camera.CurrentCamera != ThirdPersonCamera.CameraStyle.Immersive) CheckTargetForSnap();
+            CheckTargetForSnap(attack);
             animator.AttackOverride(attack);
             animator.Attack();
             movement.Block();
             camera.locked = true;
+            if(attack.downAttack) DownAttack();
+            if (attack.airSuspension) AirSuspension();
+            if(attack.chargeAttack || attack.downAttack || attack.defensePosture) animator.Freeze(true);
             
             OnStartAttack?.Invoke();
         }
 
         public void EndAttack()
         {
-            if(!_isAttacking) return;
-            
-            if (!_currentAttack.chargeAttack)
+            if(!_isAttacking || _waiting) return;
+
+            if (_currentAttack.chargeAttack || _currentAttack.downAttack || _currentAttack.defensePosture)
             {
+                _waiting = true;
+                _waitTime = Time.time;
+                if(_currentAttack.downAttack) DownAttack();
+                if(_currentAttack.defensePosture) DefensePosture();
+                if(_currentAttack.chargeAttack) _charging = true;
+            }
+            else
+            {
+                _isDashing = false;
                 _isAttacking = false;
                 _currentAttack = null;
+                _isSuspended = false;
+                _onPosture = false;
+                _charging = false;
             }
-            else waiting = true;
             
-            _hitboxPool.OnEndAttack();
             movement.Free();
             camera.locked = false;
             
             OnEndAttack?.Invoke();
+        }
+
+        public void CancelAttack()
+        {
+            if(!_isAttacking) return;
+            
+            _isAttacking = false;
+            _currentAttack = null;
+            _hitboxPool.OnEndAttack();
+            movement.Free();
+            camera.locked = false;
+            _isDashing = false;
+            _isSuspended = false;
+            _onPosture = false;
+            _charging = false;
+            
+            OnEndAttack?.Invoke();
+        }
+
+        public bool PriorityCheck(int priority)
+        {
+            if(!_isAttacking || _currentAttack == null) return true;
+
+            int myAttackPriority = _currentAttack.priority;
+            return myAttackPriority < priority; //returns true if incoming attack is stronger
         }
 
         public void Tick()
@@ -114,12 +201,15 @@ namespace Movement3D.Gameplay
             if(!IsAttacking) return;
             
             _hitboxPool.AttackTick(tick);
+            if(tick == _currentAttack.dashTick && _currentAttack.dashAttack) _isDashing = true;
+            if(_currentAttack.shootAttack) Shoot(tick);
+            else _isDashing = false;
             tick++;
         }
 
-        private void CheckTargetForSnap()
+        private void CheckTargetForSnap(FullAttack attack)
         {
-            if (!_currentAttack.suckToTarget) return;
+            _lastDirectionToTarget = Vector3.zero;
             
             float range = Mathf.Max(_minRange, _currentAttack.attackRange);
             var floorPosition = _invoker.FloorPosition.Get();
@@ -141,22 +231,81 @@ namespace Movement3D.Gameplay
                 var centerTarget = temp.Invoker.CenterPosition.Get();
                 var center = _invoker.CenterPosition.Get();
                 var directionToTarget = (centerTarget - center).With(y: 0).normalized;
+                var distance = Vector3.Distance(center, centerTarget);
                 var forward = _invoker.PlayerForward.Get();
-                var angle = Vector3.SignedAngle(directionToTarget, forward, Vector3.forward);
-
-                if (Mathf.Abs(angle) > _aimAngle / 2) return;
+                var angle = Vector3.Angle(directionToTarget, forward);
                 
-                var distance = Vector3.Distance(centerTarget, center);
-                if (distance < closestDistance)
+                bool obstacle = Physics.Raycast(center, directionToTarget, distance, _solid);
+
+                if (Mathf.Abs(angle) > _aimAngle / 2 || obstacle) continue;
+                
+                var absDistance = DistanceRadial(Mathf.Abs(angle), distance);
+                if (absDistance < closestDistance)
                 {
                     closest = temp;
                     closestDistance = distance;
                 }
             }
 
+            FollowUp(closest, attack);
+            
             if (closest == null) return;
             
-            SuckToTarget(closest);
+            SuckToTarget(closest, attack);
+        }
+
+        private void DownAttack()
+        {
+            if(!_isAttacking || _currentAttack == null) return;
+            
+            if(physics.OnGround || !_currentAttack.downAttack) return;
+            
+            _invoker.AddForce.Execute(new(Vector3.down, _currentAttack.downImpulse, ForceMode.VelocityChange));
+        }
+
+        private void FollowUp(PlayerController closest, FullAttack attack)
+        {
+            if (attack.dashAttack || attack.downAttack) return;
+            
+            var followUpForce = attack.followUp;
+            Vector3 direction;
+            if (closest == null)
+            {
+                var targetCenter = _invoker.CenterPosition.Get();
+                var center = _invoker.CenterPosition.Get();
+                direction = (targetCenter - center).With(y: 0).normalized;
+            }
+            else
+            {
+                direction = _invoker.PlayerForward.Get();
+            }
+
+            _invoker.AddForce.Execute(new(direction, followUpForce, ForceMode.VelocityChange));
+        }
+
+        public void Dash()
+        {
+            if(!IsAttacking || _currentAttack == null) return;
+
+            if (tick != _currentAttack.dashTick) return;
+            
+            var direction = _invoker.PlayerForward.Get();
+            _invoker.AddForce.Execute(new(direction, _currentAttack.dashImpulse, ForceMode.Acceleration));
+        }
+
+        public void Shoot(int tick)
+        {
+            if(!IsAttacking || _currentAttack == null) return;
+            
+            if(!_currentAttack.shootAttack) return;
+
+            var forward = _invoker.PlayerForward.Get();
+            var shootPosition = _bodyPartsDictionary[_currentAttack.attacks[tick].bodyPartName].position + forward * _shootOffset;
+            var projectile = ObjectPoolManager.Instance.Get(_currentAttack.projectile, shootPosition, Quaternion.identity).GetComponent<Projectile>();
+
+            bool chain = _currentAttack.chainEffects && tick == _currentAttack.chainTick;
+
+            projectile.Init(shootPosition, _lastDirectionToTarget != Vector3.zero ? _lastDirectionToTarget : forward, _currentAttack.priority, this, chain);
         }
 
         private Vector3 GetTargetOutPosition(PlayerController target)
@@ -168,36 +317,116 @@ namespace Movement3D.Gameplay
             var directionFromTarget = (center - targetCenter).With(y: 0).normalized;
             return targetFloor + directionFromTarget * radius;
         }
+
+        private float DistanceRadial(float angle, float radius)
+        {
+            float distance = angle * _aimAngleWeight + radius * _aimRadiusWeight;
+            return distance;
+        }
         
-        private void SuckToTarget(PlayerController target)
+        private void SuckToTarget(PlayerController target, FullAttack attack)
         {
             var targetCenter = target.Invoker.CenterPosition.Get(); 
-            var floor = _invoker.FloorPosition.Get();
             var center = _invoker.CenterPosition.Get();
+            var distance = (targetCenter - center).With(y: 0).magnitude;
             var directionToTarget = (targetCenter - center).With(y: 0).normalized;
-            var suckPosition = GetTargetOutPosition(target);
-            var suckDistance = (suckPosition - floor).With(y: 0).magnitude;
+
+            _invoker.Forward.Execute(directionToTarget);
+            _invoker.PlayerForward.Execute(directionToTarget);
             
-            if(suckDistance >= _minRange) _invoker.SuckToTarget.Execute(new SuckToTargetParams
+            if(distance >= _minRange && attack.suckToTarget) _invoker.SuckToTarget.Execute(new SuckToTargetParams
             {
                 position = GetTargetOutPosition(target),
                 duration = _suckToTargetduration
             });
-
-            _invoker.AlignCamera.Execute(new AlignCameraParams
-            {
-                direction = directionToTarget,
-                duration = _alignDuration
-            });
+            
+            _lastDirectionToTarget = directionToTarget;
         }
 
-        public void WaitForReleaseOrInterruption()
+        public void Interruption(bool success)
         {
-            if(!waiting || !_currentAttack.chargeAttack) return;
-            waiting = false;
+            if(!_waiting || !(_currentAttack.chargeAttack || _currentAttack.defensePosture)) return;
+            _waiting = false;
+            
+            var lastAttack = _currentAttack;
+            _isAttacking = false;
+            _currentAttack = null;
+            _isDashing = false;
+            _isSuspended = false;
+            _onPosture = false;
+            _charging = false;
+            _hitboxPool.OnEndAttack();
+            animator.Freeze(false);
+            
+            if(!lastAttack.chargeAttack || !success) return;
+            
+            _releaseMultiplier = Mathf.Min((Time.time - _waitTime) / lastAttack.chargeTime * lastAttack.chargeMultiplier, lastAttack.chargeMultiplier) + 1;
+        }
+
+        public void WaitForGround()
+        {
+            if (!physics.OnGround) return;
+            
+            if (!_waiting || !_currentAttack.downAttack) return;
+            _waiting = false;
+            _releaseMultiplier = Mathf.Min((Time.time - _waitTime) / _currentAttack.downTime * _currentAttack.downMultiplier, _currentAttack.downMultiplier) + 1;
             
             _isAttacking = false;
             _currentAttack = null;
+            _isDashing = false;
+            _isSuspended = false;
+            _onPosture = false;
+            _charging = false;
+            _hitboxPool.OnEndAttack();
+            animator.Freeze(false);
+            
+            combo.ForcedTravel();
+        }
+
+        public void MultiplierReset()
+        {
+            _releaseMultiplier = 1;
+        }
+
+        private void AirSuspension()
+        {
+            if(physics.OnGround) return;
+            
+            var velocity = _invoker.Velocity.Get().With(y: 0);
+            _invoker.Velocity.Execute(velocity);
+            
+            _isSuspended = true;
+        }
+
+        private void DefensePosture()
+        {
+            _onPosture = true;
+            _postureTimer.Reset(_currentAttack.defensePostureMaxTime);
+            _postureTimer.Start();
+        }
+
+        public void Apply(ref HitInfo hitInfo) //Counter Attack
+        {
+            if(!_onPosture) return;
+            
+            if(!_isAttacking || _currentAttack == null) return;
+
+            _postureTimer.Stop();
+            var incomingPriority = hitInfo.priority;
+            var myAttackPriority = _currentAttack.priority;
+            if (incomingPriority < _currentAttack.priority)
+            {
+                hitInfo.success = false;
+                if(!hitInfo.projectile) combo.ForcedTravel();
+            }
+            else
+            {
+                int diff = incomingPriority - myAttackPriority;
+                int reduction = Mathf.Max(10 - diff, 1);
+                
+                hitInfo.hit.knockback /= reduction;
+                hitInfo.hit.damage /= reduction;
+            }
         }
     }
 
@@ -205,30 +434,35 @@ namespace Movement3D.Gameplay
     public struct SingleHit
     {
         //Hit Info Space
+        [Header("Positioning")]
         public string bodyPartName;
         public Vector3 positionOffset;
         public float radius;
         
         //Hit Info Time
+        [Header("Timing")]
         public int tick;
         public float delay;
         public float duration;
         
         //Primary Effects
-        public int priority; //More priority, less possibility to be canceled and to cancel incoming attacks
+        [Header("Effects")]
         public float damage;
         public Vector2 knockback;
         public float stunTime;
-        public Vector2 followUp;
+        
+        //Visual
+        [Header("Visual")] 
+        public GameObject vfxPrefab;
     }
 
     [Serializable]
     public struct HitInfo
     {
         public SingleHit hit;
-        
         public Vector3 position;
-
+        public int priority;
+        public bool projectile;
         public bool success;
     }
 }

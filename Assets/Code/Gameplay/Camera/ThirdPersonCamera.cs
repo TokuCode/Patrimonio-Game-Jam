@@ -57,7 +57,8 @@ namespace Movement3D.Gameplay
                 _strategy.Follow = playerController.CameraTrackingTarget; 
                 _immersive = playerController.ImmersiveCamera;
                 _immersive.Follow = playerController.CameraPosition;
-                _immersive.LookAt = playerController.LookAt;
+                _immersive.LookAt = playerController.LookAtFollow;
+                immersiveCamera.SetInput(_immersive.gameObject.GetComponent<CinemachineInputAxisController>());
             }
         }
 
@@ -143,7 +144,6 @@ namespace Movement3D.Gameplay
             _strategy.Priority = _cameraStyle == CameraStyle.Strategy ? 100 : 0;
             _immersive.Priority = _cameraStyle == CameraStyle.Immersive ? 100 : 0;
             immersiveCamera.enabled = cameraStyle == CameraStyle.Immersive;
-            if(immersiveCamera.enabled) immersiveCamera.UpdateCoordinates();
             
             if(_cameraStyle == CameraStyle.Immersive) Invoke(nameof(SetCullingMask), .5f);
             else SetCullingMask();

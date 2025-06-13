@@ -49,6 +49,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Above
+    uniqueID: 3502413965
+    locked: 0
   m_RenderingLayers:
   - Default
   - Light Layer 1
@@ -57,4 +60,4 @@ TagManager:
   - Light Layer 4
   - Light Layer 5
   - Light Layer 6
-  - TerrainOnly
+  - VFX

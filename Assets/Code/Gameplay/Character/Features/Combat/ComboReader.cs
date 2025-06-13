@@ -8,7 +8,10 @@ namespace Movement3D.Gameplay
 {
     public class ComboReader : Feature
     {
+        private const string nextKeyword = "next";
+        
         private Attack attack;
+        private Resource resource;
         private List<string> bufferSignal;
         private ComboContainer _graph;
         
@@ -31,6 +34,7 @@ namespace Movement3D.Gameplay
             _chainTimer = new CountdownTimer(chainTime);
             _chainTimer.OnTimerStop += ClearAttackCache;
             _dependencies.TryGetFeature(out attack);
+            _dependencies.TryGetFeature(out resource);
             attack.OnStartAttack += OnStartAttack;
             attack.OnEndAttack += OnEndAttack;
             
@@ -45,12 +49,12 @@ namespace Movement3D.Gameplay
 
         public override void UpdateFeature()
         {
-            _chainTimer.Tick(Time.deltaTime);
+            if(!_locked && !attack.Waiting) _chainTimer.Tick(Time.deltaTime);
         }
 
         public override void Apply(ref InputPayload @event)
         {
-            if(_locked) return;
+            if(_locked || !resource.AbleToAttack) return;
 
             string signal = @event.Signal;
             if(string.IsNullOrWhiteSpace(signal)) return;
@@ -80,11 +84,14 @@ namespace Movement3D.Gameplay
             if (count != layers) return false;
             var temp = transition.Split(InputBuffer.Separator).ToList();
             string all = InputBuffer.AllKeyword;
+            string next = nextKeyword;
 
             for (int i = 0; i < layers && i < temp.Count; i++)
             {
+                if (i == 0 && EQ(temp[i], next)) return true;
+                
                 if(EQ(temp[i],all)) continue;
-                if (!EQ(temp[i], bufferSignal[i])) return false;
+                if(!EQ(temp[i], bufferSignal[i])) return false;
             }
             return true;
         }
@@ -97,31 +104,59 @@ namespace Movement3D.Gameplay
             return lhs.Equals(rhs);
         }
 
+        public void ForcedTravel()
+        {
+            if(_graph == null || _actualCombo == null) return;
+            
+            var transition = _graph.links.FirstOrDefault(link => link.sourceNodeGuid == _actualCombo.nodeGuid && nextKeyword.Equals(link.tag));
+            
+            if(transition == null) return;
+            
+            var targetNode = _graph.nodes.First(node => node.nodeGuid == transition.targetNodeGuid);
+            attack.Interruption(true);
+            LoadNode(targetNode);
+            _transition = transition;
+        }
+
         private void TraverseGraph()
         {
             if (_graph == null) return;
 
             var entry = _graph.nodes.First(node => node.isEntryPoint);
-            var entryTransition = _graph.links.Where(link => link.sourceNodeGuid == entry.nodeGuid && link != _transition);
+            var entryTransition = _graph.links.Where(link => link.sourceNodeGuid == entry.nodeGuid && link != _transition).ToList();
+            var mainTransition = new List<NodeLinkData>();
             if (_actualCombo != null)
             {
-                entryTransition.Union(_graph.links.Where(link => link.sourceNodeGuid == _actualCombo.nodeGuid));
+                mainTransition = _graph.links.Where(link => link.sourceNodeGuid == _actualCombo.nodeGuid).ToList();
             }
 
-            foreach (var transition in entryTransition.ToList())
+            foreach (var transition in mainTransition)
             {
                 var tag = transition.tag;
                 if (Match(tag))
                 {
                     var targetNode = _graph.nodes.First(node => node.nodeGuid == transition.targetNodeGuid);
-                    attack.WaitForReleaseOrInterruption();
+                    attack.Interruption(true);
+                    LoadNode(targetNode);
+                    _transition = transition;
+                    return;
+                }
+            }
+            
+            foreach (var transition in entryTransition)
+            {
+                var tag = transition.tag;
+                if (Match(tag))
+                {
+                    var targetNode = _graph.nodes.First(node => node.nodeGuid == transition.targetNodeGuid);
+                    attack.Interruption(false);
                     LoadNode(targetNode);
                     _transition = transition;
                     return;
                 }
             }
 
-            if (Match(_transition.tag)) LoadAttack();
+            if (_transition != null && Match(_transition.tag)) LoadAttack();
         }
 
         private void LoadAttack()
@@ -136,6 +171,7 @@ namespace Movement3D.Gameplay
             if (retrieveAttack != null)
             {
                 currentAttack = retrieveAttack;
+                resource.OnAttackStamina();
                 attack.StartAttack(currentAttack);
             }
         }

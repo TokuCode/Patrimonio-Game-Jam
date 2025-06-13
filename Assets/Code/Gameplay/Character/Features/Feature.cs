@@ -20,6 +20,7 @@ namespace Movement3D.Gameplay
 
         public virtual void UpdateFeature(){ }
         public virtual void FixedUpdateFeature(){ }
+        public virtual void ResetFeature() { }
         public virtual void Apply(ref InputPayload @event) { }
     }
 }

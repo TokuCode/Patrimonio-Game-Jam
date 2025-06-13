@@ -11,13 +11,17 @@ namespace Movement3D.Gameplay
             Walking,
             Crouching,
             Running,
-            Blocked
+            Blocked,
+            Dashing,
+            Charging
         }
         
         private Crouch crouch;
         private PhysicsCheck physics;
         private Movement movement;
         private PlayerAnimator animator;
+        private Resource resource;
+        private Attack attack;
 
         [Header("Runtime")]
         [SerializeField] private float _currentMaxSpeed;
@@ -30,7 +34,7 @@ namespace Movement3D.Gameplay
         public State MoveState => _state;
         private Coroutine _speedControl;
         [SerializeField] private bool _isRunning;
-        public bool IsRunning => _isRunning;
+        public bool IsRunning => _isRunning && _invoker.Velocity.Get().With(y: 0).magnitude > 1;
 
         [Header("Walking")]
         [SerializeField] private float _walkMaxSpeed;
@@ -48,6 +52,13 @@ namespace Movement3D.Gameplay
         [SerializeField] private float _timeSmoothing;
         [SerializeField] private float _smoothingThreshold;
         [SerializeField] private float _coyoteRunTime;
+        
+        [Header("Dashing")]
+        [SerializeField] private float _dashMaxSpeed;
+        
+        [Header("Charging")]
+        [SerializeField] private float _chargeMaxSpeed;
+        [SerializeField] private float _chargeAcceleration;
 
         public override void InitializeFeature(Controller controller)
         {
@@ -56,6 +67,8 @@ namespace Movement3D.Gameplay
             _dependencies.TryGetFeature(out crouch);
             _dependencies.TryGetFeature(out physics);
             _dependencies.TryGetFeature(out movement);
+            _dependencies.TryGetFeature(out resource);
+            _dependencies.TryGetFeature(out attack);
             if (controller is PlayerController player) animator = player.Animator;
             
             StateManager(true);
@@ -71,8 +84,8 @@ namespace Movement3D.Gameplay
 
         private void TryRun(bool runInput)
         {
-            if(runInput && !crouch.IsCrouching && Time.time - physics.LastGroundTime <= _coyoteRunTime) _isRunning = true;
-            else if(!runInput) _isRunning = false;
+            if(runInput && !crouch.IsCrouching && Time.time - physics.LastGroundTime <= _coyoteRunTime && resource.AbleToRun) _isRunning = true;
+            else if(!runInput || !resource.AbleToRun) _isRunning = false;
         }
 
         public override void UpdateFeature()
@@ -103,13 +116,27 @@ namespace Movement3D.Gameplay
             {
                 _state = State.Blocked;
             }
+            
+            else if (attack.IsDashing)
+            {
+                _state = State.Dashing;
+                _desiredMaxSpeed = _dashMaxSpeed;
+            }
+            
+            else if (attack.Charging)
+            {
+                _state = State.Charging;
+                _desiredMaxSpeed = _chargeMaxSpeed;
+                acceleration = _chargeAcceleration;
+                enableTransition = true;
+            }
 
             else if(crouch.IsCrouching)
             {
                 _state = State.Crouching;
                 
                 _desiredMaxSpeed = _crouchMaxSpeed;
-                acceleration = _crouchMaxSpeed;
+                acceleration = _crouchAcceleration;
                 enableTransition = true;
             }
 

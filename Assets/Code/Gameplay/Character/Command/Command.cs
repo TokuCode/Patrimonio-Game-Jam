@@ -92,6 +92,7 @@ namespace Movement3D.Gameplay
 
         public void Execute(Vector3 args)
         {
+            if(rigidbody.isKinematic) return;
             rigidbody.linearVelocity = args;
         }
 
@@ -304,7 +305,6 @@ namespace Movement3D.Gameplay
     public class SuckToTargetCommand : ICommand<SuckToTargetParams>
     {
         private Rigidbody rigidbody;
-        private Ease ease;
         private AnimationCurve curve;
         
         private StopwatchTimer timer;
@@ -350,6 +350,26 @@ namespace Movement3D.Gameplay
         }
     }
 
+    public class SuckToTargetDOTween : ICommand<SuckToTargetParams>
+    {
+        private Rigidbody rigidbody;
+        private Transform obj;
+        private Ease ease;
+
+        public SuckToTargetDOTween(Ease ease, Transform obj, Rigidbody rigidbody)
+        {
+            this.rigidbody = rigidbody;
+            this.obj = obj;
+            this.ease = ease;
+        }
+
+        public void Execute(SuckToTargetParams args)
+        {
+            rigidbody.isKinematic = true;
+            obj.DOMove(args.position, args.duration).SetEase(ease).OnComplete(() => { rigidbody.isKinematic = false; });
+        }
+    }
+
     public struct AlignCameraParams
     {
         public Vector3 direction;
@@ -373,7 +393,25 @@ namespace Movement3D.Gameplay
             _obj.DOLookAt(_obj.transform.position + args.direction, args.duration);
         }
     }
+    
+    public class AlignCameraAltCommand : ICommand<AlignCameraParams>
+    {
+        private Transform _orientation;
+        private Transform _obj;
 
+        public AlignCameraAltCommand(Transform obj, Transform orientation)
+        {
+            _orientation = orientation;
+            _obj = obj;
+        }
+
+        public void Execute(AlignCameraParams args)
+        {
+            _orientation.LookAt(_orientation.transform.position + args.direction);
+            _obj.LookAt(_obj.transform.position + args.direction);
+        }
+    }
+    
     public class ColliderCenterHandler : ICommand<float>, IRequest<float>
     {
         private CapsuleCollider capsule;

@@ -8,6 +8,8 @@ namespace Movement3D.Gameplay
         private Crouch crouch;
         private Movement movement;
         private PlayerAnimator animator;
+        private Resource resource;
+        private Attack attack;
     
         [Header("Jump Parameters")]
         [SerializeField] private float _jumpForce;
@@ -33,6 +35,8 @@ namespace Movement3D.Gameplay
             _dependencies.TryGetFeature(out physics);
             _dependencies.TryGetFeature(out crouch);
             _dependencies.TryGetFeature(out movement);
+            _dependencies.TryGetFeature(out resource);
+            _dependencies.TryGetFeature(out attack);
             if (controller is PlayerController player) animator = player.Animator;
 
             if (controller is PlayerController _player)
@@ -71,11 +75,12 @@ namespace Movement3D.Gameplay
         {
             float timeSinceGround = Time.time - physics.LastGroundTime;
             bool canJumpInternal = _jumpCooldownTimer <= 0 && timeSinceGround <= _coyoteJumpTime;
-            bool canJumpExternal = !movement.IsMovementBlocked; //TODO Add Stun
+            bool canJumpExternal = !movement.IsMovementBlocked && resource.AbleToJump; //TODO Add Stun
 
             if (canJumpInternal && canJumpExternal)
             {
                 JumpAction();
+                resource.OnJumpStamina();
                 _jumpCooldownTimer = _jumpCooldown;
                 _onDeparture = true;
             }
@@ -94,7 +99,7 @@ namespace Movement3D.Gameplay
     
         private void SetGravityUse()
         {
-            _invoker.UseGravity.Execute(!physics.OnSlope);
+            _invoker.UseGravity.Execute(!physics.OnSlope && !attack.IsSuspended);
         }
     
         private void LimitFallSpeed()
@@ -109,7 +114,7 @@ namespace Movement3D.Gameplay
         
         private void GravityHandling(bool jumpInput)
         {
-            if (physics.OnGround || physics.OnSlope) return;
+            if (physics.OnGround || physics.OnSlope || attack.IsSuspended) return;
             
             var velocity = _invoker.Velocity.Get();
 
