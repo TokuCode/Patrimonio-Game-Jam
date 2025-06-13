@@ -14,6 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodes:
   - nodeGuid:
+      Part1: 2429029386
+      Part2: 1164570968
+      Part3: 2088936123
+      Part4: 1237178596
+    nodeName: ENTRYPOINT
+    attacks: []
+    position: {x: 100, y: 200}
+    isEntryPoint: 1
+  - nodeGuid:
       Part1: 3596085795
       Part2: 1276534610
       Part3: 2528470677
@@ -23,15 +32,6 @@ MonoBehaviour:
     - Base
     position: {x: 352, y: 200}
     isEntryPoint: 0
-  - nodeGuid:
-      Part1: 2429029386
-      Part2: 1164570968
-      Part3: 2088936123
-      Part4: 1237178596
-    nodeName: ENTRYPOINT
-    attacks: []
-    position: {x: 100, y: 200}
-    isEntryPoint: 1
   links:
   - sourceNodeGuid:
       Part1: 2429029386

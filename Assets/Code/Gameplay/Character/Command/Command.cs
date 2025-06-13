@@ -92,6 +92,7 @@ namespace Movement3D.Gameplay
 
         public void Execute(Vector3 args)
         {
+            if(rigidbody.isKinematic) return;
             rigidbody.linearVelocity = args;
         }
 
@@ -304,7 +305,6 @@ namespace Movement3D.Gameplay
     public class SuckToTargetCommand : ICommand<SuckToTargetParams>
     {
         private Rigidbody rigidbody;
-        private Ease ease;
         private AnimationCurve curve;
         
         private StopwatchTimer timer;
@@ -347,6 +347,26 @@ namespace Movement3D.Gameplay
             float parameter = Mathf.Clamp01(timer.GetTime() / duration);
             float parameterInCurve = curve.Evaluate(parameter);
             rigidbody.MovePosition(Vector3.Lerp(rigidbody.position, target, parameterInCurve));
+        }
+    }
+
+    public class SuckToTargetDOTween : ICommand<SuckToTargetParams>
+    {
+        private Rigidbody rigidbody;
+        private Transform obj;
+        private Ease ease;
+
+        public SuckToTargetDOTween(Ease ease, Transform obj, Rigidbody rigidbody)
+        {
+            this.rigidbody = rigidbody;
+            this.obj = obj;
+            this.ease = ease;
+        }
+
+        public void Execute(SuckToTargetParams args)
+        {
+            rigidbody.isKinematic = true;
+            obj.DOMove(args.position, args.duration).SetEase(ease).OnComplete(() => { rigidbody.isKinematic = false; });
         }
     }
 

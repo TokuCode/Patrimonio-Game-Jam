@@ -6,6 +6,8 @@ namespace Movement3D.Gameplay
 {
     public class PlayerController : Controller
     {
+        [SerializeField] private string _playerName;
+        public string Name => _playerName;
         [SerializeField] private bool _isPlayer;
         public bool IsPlayer => _isPlayer;
         [SerializeField] private Transform _orientation;
@@ -22,6 +24,8 @@ namespace Movement3D.Gameplay
         public Transform CameraReferences => _cameraReferences;
         [SerializeField] private Transform _cameraTrackingTarget;
         public Transform CameraTrackingTarget => _cameraTrackingTarget;
+        [SerializeField] private Transform _lookAtFollow;
+        public Transform LookAtFollow => _lookAtFollow;
         [SerializeField] private AnimationCurve _suckToTargetEase;
         public AnimationCurve SuckToTargetEase => _suckToTargetEase;
         
@@ -33,7 +37,10 @@ namespace Movement3D.Gameplay
         public CinemachineCamera StrategyCamera => _strategyCamera;
         private CinemachineCamera _immersiveCamera;
         public CinemachineCamera ImmersiveCamera => _immersiveCamera;
-        
+
+        [SerializeField] private Canvas _spaitalUI;
+        [SerializeField] private FloatingText _damageNumber;
+        public FloatingText DamageNumber => _damageNumber;
         
         public CapsuleCollider Capsule { get; private set; }
         public Rigidbody Rigidbody { get; private set; }
@@ -60,7 +67,12 @@ namespace Movement3D.Gameplay
             Invoker = new Invoker(this);
             
             base.Awake();
-            if(_isPlayer) InputReader.Instance.CacheController(this);
+            if (_isPlayer)
+            {
+                _spaitalUI.gameObject.SetActive(false);
+                InputReader.Instance.CacheController(this);
+            }
+            else _spaitalUI.worldCamera = Camera.main;
         }
 
         private void SetSingleton()
@@ -93,7 +105,6 @@ namespace Movement3D.Gameplay
             
             InputPayload input = new()
             {
-                MouseDelta = _controls.MouseDelta,
                 MoveDirection = _controls.MoveDirection,
                 Jump = _controls.Jump,
                 Run = _controls.Run,

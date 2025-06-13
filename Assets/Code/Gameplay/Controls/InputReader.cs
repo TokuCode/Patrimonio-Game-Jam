@@ -13,7 +13,6 @@ namespace Movement3D.Gameplay
 
         public event Action JumpPressed; 
         
-        public Vector2 MouseDelta { get; private set; }
         public Vector2 MoveDirection { get; private set; }
         public bool Jump { get; private set; }
         public bool Run { get; private set; }
@@ -35,15 +34,12 @@ namespace Movement3D.Gameplay
             playerController.Dependencies.TryGetFeature(out _physics);
         }
 
-        public void OnLookAround(InputAction.CallbackContext context)
-        {
-            MouseDelta = context.ReadValue<Vector2>();
-        }
-
         public void OnMove(InputAction.CallbackContext context)
         {
             MoveDirection = context.ReadValue<Vector2>();
         }
+
+        public void OnLook(InputAction.CallbackContext context) { }
 
         public void OnJump(InputAction.CallbackContext context)
         {
@@ -61,6 +57,14 @@ namespace Movement3D.Gameplay
             else if(context.canceled) Run = false;
         }
 
+        public void OnCrouchGamepad(InputAction.CallbackContext context)
+        {
+            if (context.performed)
+            {
+                Crouch = !Crouch;
+            }
+        }
+
         public void OnCrouch(InputAction.CallbackContext context)
         {
             if (context.performed) Crouch = true;
@@ -71,8 +75,7 @@ namespace Movement3D.Gameplay
         {
             if (context.performed)
             {
-                CacheAttackTag("attack");
-                ReleaseCachedTag();
+                InputBuffer.Instance.Input("attack", 0);
                 InputBuffer.Instance.Input("neutral", 1);
                 Set3rdLayerTag();
             }
@@ -82,8 +85,7 @@ namespace Movement3D.Gameplay
         {
             if (context.performed)
             {
-                CacheAttackTag("special");
-                ReleaseCachedTag();
+                InputBuffer.Instance.Input("special", 0);
                 InputBuffer.Instance.Input("neutral", 1);
                 Set3rdLayerTag();
             }
@@ -94,21 +96,44 @@ namespace Movement3D.Gameplay
             if (context.performed)
             {
                 Charge = true;
-                ReleaseCachedTag();
+                ReleaseCachedTag(true);
                 InputBuffer.Instance.Input("charge", 1);
                 Set3rdLayerTag();
             }
+        }
 
-            else if (context.canceled)
+        public void OnReleaseAttack(InputAction.CallbackContext context)
+        {
+            if (context.canceled && Charge && _1sttag == "attack")
             {
                 Charge = false;
-                if (Charge)
-                {
-                    ReleaseCachedTag();
-                    InputBuffer.Instance.Input("release", 1);
-                    Set3rdLayerTag();
-                }
+                ReleaseCachedTag();
+                InputBuffer.Instance.Input("release", 1);
+                Set3rdLayerTag(); 
             }
+            else if (context.performed)
+            {
+                CacheAttackTag("attack");
+            }
+            
+            if(context.canceled && _1sttag == "attack") ReleaseCachedTag();
+        }
+
+        public void OnReleaseSpecial(InputAction.CallbackContext context)
+        {
+            if (context.canceled && Charge && _1sttag == "special")
+            {
+                Charge = false;
+                ReleaseCachedTag();
+                InputBuffer.Instance.Input("release", 1);
+                Set3rdLayerTag(); 
+            }  
+            else if (context.performed)
+            {
+                CacheAttackTag("special");
+            }
+            
+            if(context.canceled && _1sttag == "special") ReleaseCachedTag();
         }
 
         private void Set3rdLayerTag()
@@ -129,10 +154,10 @@ namespace Movement3D.Gameplay
             _1sttag = tag;
         }
 
-        private void ReleaseCachedTag()
+        private void ReleaseCachedTag(bool refeed = false)
         {
             InputBuffer.Instance.Input(_1sttag, 0);
-            _1sttag = String.Empty;
+            if(!refeed) _1sttag = String.Empty;
         }
     }
 }

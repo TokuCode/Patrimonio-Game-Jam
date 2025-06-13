@@ -1,0 +1,210 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a37019ed594d4c73b1f6e2042da6fa7d, type: 3}
+  m_Name: TestKit
+  m_EditorClassIdentifier: 
+  nodes:
+  - nodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    nodeName: ENTRYPOINT
+    attacks: []
+    position: {x: 100, y: 200}
+    isEntryPoint: 1
+  - nodeGuid:
+      Part1: 1713891890
+      Part2: 1101817329
+      Part3: 3019981216
+      Part4: 2434060138
+    nodeName: Base
+    attacks:
+    - TKBase1
+    - TKBase2
+    - TKBase3
+    position: {x: 489, y: 31}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 368474492
+      Part2: 1257273771
+      Part3: 1949819308
+      Part4: 3770018956
+    nodeName: Charge
+    attacks:
+    - TKCharge
+    position: {x: 479, y: 241}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 469580136
+      Part2: 1183420024
+      Part3: 3582925207
+      Part4: 2527464688
+    nodeName: Jump Attack
+    attacks:
+    - TKUpper
+    position: {x: 502, y: 421}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 4077623855
+      Part2: 1186430625
+      Part3: 1146128001
+      Part4: 2127693229
+    nodeName: Special Base
+    attacks:
+    - TKSpecial
+    - TKSpecial
+    - TKSFinish
+    position: {x: 498, y: 587}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 753500552
+      Part2: 1224291478
+      Part3: 565379741
+      Part4: 561460879
+    nodeName: Air Special
+    attacks:
+    - TKSAir
+    position: {x: 498, y: 809}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 3066300186
+      Part2: 1322443571
+      Part3: 2402099887
+      Part4: 3263768809
+    nodeName: Release
+    attacks:
+    - TKRelease
+    position: {x: 776, y: 241}
+    isEntryPoint: 0
+  links:
+  - sourceNodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    targetNodeGuid:
+      Part1: 1713891890
+      Part2: 1101817329
+      Part3: 3019981216
+      Part4: 2434060138
+    tag: attack-neutral-ground
+  - sourceNodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    targetNodeGuid:
+      Part1: 368474492
+      Part2: 1257273771
+      Part3: 1949819308
+      Part4: 3770018956
+    tag: attack-charge-ground
+  - sourceNodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    targetNodeGuid:
+      Part1: 469580136
+      Part2: 1183420024
+      Part3: 3582925207
+      Part4: 2527464688
+    tag: attack-all-jump
+  - sourceNodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    targetNodeGuid:
+      Part1: 4077623855
+      Part2: 1186430625
+      Part3: 1146128001
+      Part4: 2127693229
+    tag: special-neutral-ground
+  - sourceNodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    targetNodeGuid:
+      Part1: 753500552
+      Part2: 1224291478
+      Part3: 565379741
+      Part4: 561460879
+    tag: special-neutral-air
+  - sourceNodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    targetNodeGuid:
+      Part1: 753500552
+      Part2: 1224291478
+      Part3: 565379741
+      Part4: 561460879
+    tag: special-neutral-jump
+  - sourceNodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    targetNodeGuid:
+      Part1: 753500552
+      Part2: 1224291478
+      Part3: 565379741
+      Part4: 561460879
+    tag: special-neutral-fall
+  - sourceNodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    targetNodeGuid:
+      Part1: 469580136
+      Part2: 1183420024
+      Part3: 3582925207
+      Part4: 2527464688
+    tag: attack-neutral-air
+  - sourceNodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    targetNodeGuid:
+      Part1: 469580136
+      Part2: 1183420024
+      Part3: 3582925207
+      Part4: 2527464688
+    tag: attack-neutral-fall
+  - sourceNodeGuid:
+      Part1: 368474492
+      Part2: 1257273771
+      Part3: 1949819308
+      Part4: 3770018956
+    targetNodeGuid:
+      Part1: 3066300186
+      Part2: 1322443571
+      Part3: 2402099887
+      Part4: 3263768809
+    tag: attack-release-all
+  - sourceNodeGuid:
+      Part1: 1529005058
+      Part2: 1159353355
+      Part3: 524654758
+      Part4: 2025826022
+    targetNodeGuid:
+      Part1: 3066300186
+      Part2: 1322443571
+      Part3: 2402099887
+      Part4: 3263768809
+    tag: attack-release-all

@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe47fc4c739f4b99bd3946a4b051fabe, type: 3}
+  m_Name: TKSFinish
+  m_EditorClassIdentifier: 
+  attackName: TKSFinish
+  attackRange: 7.5
+  animationClip: {fileID: -203655887218126122, guid: 5f8e1ad1981f5844692c3a9d3d3441b7, type: 3}
+  priority: 15
+  attacks:
+  - bodyPartName: left-foot
+    positionOffset: {x: 0, y: 0, z: 0}
+    radius: 0.5
+    tick: 0
+    delay: 0
+    duration: 0.45
+    damage: 25
+    knockback: {x: 5, y: 3}
+    stunTime: 1.5
+    vfxPrefab: {fileID: 0}
+  followUp: 2
+  suckToTarget: 0
+  chargeAttack: 0
+  chargeMultiplier: 0
+  chargeTime: 0
+  dashAttack: 0
+  dashTick: 0
+  dashImpulse: 0
+  downAttack: 0
+  downImpulse: 0
+  downTime: 0
+  downMultiplier: 0
+  airSuspension: 0
+  defensePosture: 0
+  defensePostureMaxTime: 0
+  shootAttack: 0
+  projectile: {fileID: 0}
+  chainEffects: 0
+  chainTick: 0
