@@ -26,6 +26,14 @@ namespace Movement3D.Gameplay
         [SerializeField] private float _stepSize;
         [SerializeField] private LayerMask _whatIsGround;
 
+        public override void ResetFeature(ref SharedProperties shared)
+        {
+            _isPathBlocked = false;
+            _isPathLadderStep = false;
+            _lastMoveInput = Vector2.zero;
+            _moveDirection = Vector3.zero;
+        }
+
         public override void InitializeFeature(Controller controller)
         {
             base.InitializeFeature(controller);

@@ -28,7 +28,12 @@ namespace Movement3D.Gameplay
         [SerializeField] private float _maxFallSpeed;
         [SerializeField] private float _fallMultiplier;
         [SerializeField] private float _lowJumpMultiplier;
-    
+
+        public override void ResetFeature(ref SharedProperties shared)
+        {
+            _onDeparture = false;
+        }
+
         public override void InitializeFeature(Controller controller)
         {
             base.InitializeFeature(controller);
@@ -73,6 +78,8 @@ namespace Movement3D.Gameplay
 
         private void TryJump()
         {
+            if (!gameObject.activeSelf) return;
+            
             float timeSinceGround = Time.time - physics.LastGroundTime;
             bool canJumpInternal = _jumpCooldownTimer <= 0 && timeSinceGround <= _coyoteJumpTime;
             bool canJumpExternal = !movement.IsMovementBlocked && resource.AbleToJump; //TODO Add Stun

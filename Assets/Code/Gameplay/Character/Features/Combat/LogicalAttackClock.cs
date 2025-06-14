@@ -4,11 +4,12 @@ namespace Movement3D.Gameplay
 {
     public class LogicalAttackClock : MonoBehaviour
     {
+        [SerializeField] PlayerController player;
         private Attack _attack;
 
         private void Start()
         {
-            PlayerController.Singleton.Dependencies.TryGetFeature(out _attack);
+            player.Dependencies.TryGetFeature(out _attack);
         }
 
         public void Tick()

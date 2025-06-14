@@ -39,6 +39,27 @@ namespace Movement3D.Gameplay
             }
         }
 
+        public virtual void Deactivate(out SharedProperties shared)
+        {
+            shared = new SharedProperties();
+            foreach (var feature in _features)
+            {
+                feature.ResetFeature(ref shared);
+            }
+            
+            gameObject.SetActive(false);
+        }
+
+        public virtual void Reactivate(SharedProperties shared)
+        {
+            gameObject.SetActive(true);
+            
+            foreach (var feature in _features)
+            {
+                feature.ReInitializeFeature(this, shared);
+            }
+        }
+
         public bool Get<T>(out T feature) where T : IFeature
         {
             return Dependencies.TryGetFeature(out feature);

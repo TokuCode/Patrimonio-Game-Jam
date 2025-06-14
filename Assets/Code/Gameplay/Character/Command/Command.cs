@@ -431,4 +431,41 @@ namespace Movement3D.Gameplay
             return capsule.center.y;
         }
     }
+
+    public class KillCommand : IRequest<SharedProperties>
+    {
+        private PlayerController player;
+
+        public KillCommand(PlayerController player)
+        {
+            this.player = player;
+        }
+
+        public SharedProperties Get()
+        {
+            player.Deactivate(out SharedProperties shared);
+            return shared;
+        }
+    }
+
+    public struct SharedProperties
+    {
+        public float healthRatio;
+        public Vector3 position;
+    }
+
+    public class ReviveCommand : ICommand<SharedProperties>
+    {
+        private PlayerController player;
+
+        public ReviveCommand(PlayerController player)
+        {
+            this.player = player;
+        }
+
+        public void Execute(SharedProperties args)
+        {
+            player.Reactivate(args);
+        }
+    }
 }

@@ -19,7 +19,7 @@ MonoBehaviour:
   attacks:
   - bodyPartName: left-foot
     positionOffset: {x: 0, y: 0, z: 0}
-    radius: 0.5
+    radius: 0.25
     tick: 0
     delay: 0
     duration: 0.45
@@ -27,7 +27,8 @@ MonoBehaviour:
     knockback: {x: 5, y: 3}
     stunTime: 1.5
     vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
-  followUp: 2
+  followUp: 0
+  followUpForce: {x: 0, y: 0}
   suckToTarget: 1
   chargeAttack: 0
   chargeMultiplier: 0

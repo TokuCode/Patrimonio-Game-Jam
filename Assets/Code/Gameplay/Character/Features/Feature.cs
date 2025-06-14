@@ -20,7 +20,8 @@ namespace Movement3D.Gameplay
 
         public virtual void UpdateFeature(){ }
         public virtual void FixedUpdateFeature(){ }
-        public virtual void ResetFeature() { }
+        public virtual void ResetFeature(ref SharedProperties shared) { }
+        public virtual void ReInitializeFeature(Controller controller, SharedProperties shared) { }
         public virtual void Apply(ref InputPayload @event) { }
     }
 }
