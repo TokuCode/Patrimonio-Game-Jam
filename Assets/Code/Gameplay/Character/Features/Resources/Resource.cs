@@ -1,7 +1,6 @@
 ﻿using System;
 using Movement3D.Helpers;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Movement3D.Gameplay
 {
@@ -10,6 +9,9 @@ namespace Movement3D.Gameplay
         private Run run;
         private Attack attack;
         private FloatingText damageNumber;
+        private PlayerAnimator animator;
+        private Movement movement;
+        private ComboReader combo;
         
         [Header("Health")] 
         [SerializeField] private float _maxHealth;
@@ -43,6 +45,7 @@ namespace Movement3D.Gameplay
         public bool AbleToAttack => !isDepleted;
         public bool AbleToJump => !isDepleted;
         [SerializeField] private float _staminaRegenRate;
+        [SerializeField] private float _staminaRegenRateDepleted;
         [SerializeField] private float _staminaDepletionRate;
         [SerializeField] private float _staminaCooldown;
         private CountdownTimer _staminaTimer;
@@ -56,6 +59,8 @@ namespace Movement3D.Gameplay
             _regen = true;
             _dependencies.TryGetFeature(out run);
             _dependencies.TryGetFeature(out attack);
+            _dependencies.TryGetFeature(out movement);
+            _dependencies.TryGetFeature(out combo);
             _currentHealth = _maxHealth;
             _currentStamina = _baseStamina;
             _staminaTimer = new CountdownTimer(_staminaCooldown);
@@ -69,13 +74,36 @@ namespace Movement3D.Gameplay
             {
                 damageNumber = player.DamageNumber;
             }
+
+            if (controller is PlayerController playerController)
+            {
+                animator = playerController.Animator;
+            }
+        }
+
+        public override void ResetFeature(ref SharedProperties shared)
+        {
+            shared.healthRatio = Mathf.Clamp01(_currentHealth/_maxHealth);
+            isInvincible = false;
+            isDepleted = false;
+            isStunned = false;
+            _invincibleTimer.Stop();
+            _staminaTimer.Stop();
+            _stunTimer.Stop();
+            _currentStamina = _baseStamina;
+            _regen = true;
+        }
+
+        public override void ReInitializeFeature(Controller controller, SharedProperties shared)
+        {
+            _currentHealth = _maxHealth * shared.healthRatio;
         }
 
         public override void UpdateFeature()
         {
             _invincibleTimer.Tick(Time.deltaTime);
             _stunTimer.Tick(Time.deltaTime);
-            _staminaTimer.Tick(Time.deltaTime);
+            if(!attack.IsAttacking) _staminaTimer.Tick(Time.deltaTime);
             StaminaManagement();
             
 #if UNITY_EDITOR
@@ -88,9 +116,9 @@ namespace Movement3D.Gameplay
             if (run.IsRunning)
             {
                 _staminaDeltaAccumulator -= _staminaDepletionRate * Time.deltaTime;
-            } else if (_regen && _currentStamina < _baseStamina)
+            } else if (_regen && _currentStamina < _baseStamina && !attack.IsAttacking)
             {
-                _staminaDeltaAccumulator += _staminaRegenRate * Time.deltaTime;
+                _staminaDeltaAccumulator += (isDepleted ? _staminaRegenRateDepleted : _staminaRegenRate) * Time.deltaTime;
             }
             if (_currentStamina >= _baseStamina) isDepleted = false;
             StaminaDeltaAcumulator();
@@ -130,12 +158,14 @@ namespace Movement3D.Gameplay
         public void OnAttackStamina()
         {
             _staminaTimer.Start();
+            _regen = false;
             DeltaStamina(-_attackCost);
         }
 
         public void OnJumpStamina()
         {
             _staminaTimer.Start();
+            _regen = false;
             DeltaStamina(-_jumpCost);
         }
 
@@ -163,7 +193,7 @@ namespace Movement3D.Gameplay
 
         public void Damage(float damage)
         {
-            if(isInvincible) return;
+            if(isInvincible || isDead) return;
             
             var startHealth = _currentHealth;
             _currentHealth -= damage;
@@ -221,7 +251,15 @@ namespace Movement3D.Gameplay
 
         public void OnDeath()
         {
-            gameObject.SetActive(false);
+            movement.Block();
+            combo.ArtificialLock();
+            
+            animator.Death();
+        }
+
+        public void EffectiveDeath()
+        {
+            _invoker.Kill.Get();
         }
     }
 

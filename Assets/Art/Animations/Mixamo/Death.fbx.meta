@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 624c75d44bd64514cb4262bd025a758c
+guid: 916be94789ae4bb4e88454e6ad5265ce
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: AttackReleaseAll1
+      name: DeathAnimation
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0
-      lastFrame: 49
+      lastFrame: 91
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -55,15 +55,8 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.24709742
-        functionName: Tick
-        data: 
-        objectReferenceParameter: {instanceID: 0}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.6682353
-        functionName: End
+      - time: 1
+        functionName: Die
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0

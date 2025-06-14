@@ -34,6 +34,11 @@ namespace Movement3D.Gameplay
             _startCrouchColliderCenter = _invoker.ColliderCenter.Get();
         }
 
+        public override void ResetFeature(ref SharedProperties shared)
+        {
+            UncrouchAction();
+        }
+
         public override void Apply(ref InputPayload @event)
         {
             if(@event.Context != UpdateContext.Update) return;

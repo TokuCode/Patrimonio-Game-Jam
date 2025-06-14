@@ -1152,7 +1152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6ff7264b13727942bc62172cc555c19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isSpatial: 0
+  _isSpatial: 1
   player: {fileID: 7737123867422172283}
   _delay: 0.15
   _healthBar: {fileID: 556033998216779645}
@@ -3608,8 +3608,8 @@ GameObject:
   - component: {fileID: 6223225375822771747}
   - component: {fileID: 111693032247667421}
   m_Layer: 8
-  m_Name: Player
-  m_TagString: Player
+  m_Name: Enemy
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3696,7 +3696,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerName: 
-  _isPlayer: 1
+  _isPlayer: 0
   _orientation: {fileID: 6939811322325156057}
   _playerObj: {fileID: 7979225850220145307}
   _combatLookAt: {fileID: 2419129285250143723}

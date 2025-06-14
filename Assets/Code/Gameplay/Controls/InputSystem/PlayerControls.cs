@@ -191,6 +191,24 @@ namespace Movement3D.Gameplay
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SwitchLeft"",
+                    ""type"": ""Button"",
+                    ""id"": ""a7ddde75-bb27-4d9f-b9da-bb25fcd0aef4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SwitchRight"",
+                    ""type"": ""Button"",
+                    ""id"": ""f913bc19-0749-4655-908c-7accb48056fa"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -362,7 +380,7 @@ namespace Movement3D.Gameplay
                 {
                     ""name"": """",
                     ""id"": ""a9c0aa20-c2a3-4771-bbb9-abaf56ab4326"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
@@ -384,7 +402,7 @@ namespace Movement3D.Gameplay
                 {
                     ""name"": """",
                     ""id"": ""258cf2eb-4f14-4f01-8061-df8b011c0824"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
@@ -450,7 +468,7 @@ namespace Movement3D.Gameplay
                 {
                     ""name"": """",
                     ""id"": ""62a19224-4161-40ea-8153-f76747d910c8"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
@@ -534,6 +552,50 @@ namespace Movement3D.Gameplay
                     ""action"": ""Crouch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""68288776-e8c3-43a4-876f-07d6a0adb70a"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""SwitchLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""20fe372e-a9c2-451f-aa2f-401c9b3f85d8"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";DesktopComputer"",
+                    ""action"": ""SwitchLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e99d1d5c-0ece-47bd-a3fa-53163a91316e"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""SwitchRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3439ee67-4dea-4ffd-aa35-1d163594432a"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";DesktopComputer"",
+                    ""action"": ""SwitchRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -581,6 +643,8 @@ namespace Movement3D.Gameplay
             m_Gameplay_Hold = m_Gameplay.FindAction("Hold", throwIfNotFound: true);
             m_Gameplay_ReleaseAttack = m_Gameplay.FindAction("ReleaseAttack", throwIfNotFound: true);
             m_Gameplay_ReleaseSpecial = m_Gameplay.FindAction("ReleaseSpecial", throwIfNotFound: true);
+            m_Gameplay_SwitchLeft = m_Gameplay.FindAction("SwitchLeft", throwIfNotFound: true);
+            m_Gameplay_SwitchRight = m_Gameplay.FindAction("SwitchRight", throwIfNotFound: true);
         }
 
         ~@PlayerControls()
@@ -672,6 +736,8 @@ namespace Movement3D.Gameplay
         private readonly InputAction m_Gameplay_Hold;
         private readonly InputAction m_Gameplay_ReleaseAttack;
         private readonly InputAction m_Gameplay_ReleaseSpecial;
+        private readonly InputAction m_Gameplay_SwitchLeft;
+        private readonly InputAction m_Gameplay_SwitchRight;
         /// <summary>
         /// Provides access to input actions defined in input action map "Gameplay".
         /// </summary>
@@ -727,6 +793,14 @@ namespace Movement3D.Gameplay
             /// Provides access to the underlying input action "Gameplay/ReleaseSpecial".
             /// </summary>
             public InputAction @ReleaseSpecial => m_Wrapper.m_Gameplay_ReleaseSpecial;
+            /// <summary>
+            /// Provides access to the underlying input action "Gameplay/SwitchLeft".
+            /// </summary>
+            public InputAction @SwitchLeft => m_Wrapper.m_Gameplay_SwitchLeft;
+            /// <summary>
+            /// Provides access to the underlying input action "Gameplay/SwitchRight".
+            /// </summary>
+            public InputAction @SwitchRight => m_Wrapper.m_Gameplay_SwitchRight;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -786,6 +860,12 @@ namespace Movement3D.Gameplay
                 @ReleaseSpecial.started += instance.OnReleaseSpecial;
                 @ReleaseSpecial.performed += instance.OnReleaseSpecial;
                 @ReleaseSpecial.canceled += instance.OnReleaseSpecial;
+                @SwitchLeft.started += instance.OnSwitchLeft;
+                @SwitchLeft.performed += instance.OnSwitchLeft;
+                @SwitchLeft.canceled += instance.OnSwitchLeft;
+                @SwitchRight.started += instance.OnSwitchRight;
+                @SwitchRight.performed += instance.OnSwitchRight;
+                @SwitchRight.canceled += instance.OnSwitchRight;
             }
 
             /// <summary>
@@ -830,6 +910,12 @@ namespace Movement3D.Gameplay
                 @ReleaseSpecial.started -= instance.OnReleaseSpecial;
                 @ReleaseSpecial.performed -= instance.OnReleaseSpecial;
                 @ReleaseSpecial.canceled -= instance.OnReleaseSpecial;
+                @SwitchLeft.started -= instance.OnSwitchLeft;
+                @SwitchLeft.performed -= instance.OnSwitchLeft;
+                @SwitchLeft.canceled -= instance.OnSwitchLeft;
+                @SwitchRight.started -= instance.OnSwitchRight;
+                @SwitchRight.performed -= instance.OnSwitchRight;
+                @SwitchRight.canceled -= instance.OnSwitchRight;
             }
 
             /// <summary>
@@ -973,6 +1059,20 @@ namespace Movement3D.Gameplay
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnReleaseSpecial(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "SwitchLeft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnSwitchLeft(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "SwitchRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnSwitchRight(InputAction.CallbackContext context);
         }
     }
 }

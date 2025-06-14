@@ -19,6 +19,11 @@ namespace Movement3D.Gameplay
         private bool _isMovementBlocked;
         public bool IsMovementBlocked => _isMovementBlocked;
 
+        public override void ResetFeature(ref SharedProperties shared)
+        {
+            Free();
+        }
+
         public override void InitializeFeature(Controller controller) //TODO Add Stun Check
         {
             base.InitializeFeature(controller);

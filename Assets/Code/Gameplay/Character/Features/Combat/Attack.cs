@@ -84,6 +84,21 @@ namespace Movement3D.Gameplay
         private CountdownTimer _postureTimer;
         private Vector3 _lastDirectionToTarget;
 
+        public override void ResetFeature(ref SharedProperties shared)
+        {
+            _isAttacking = false;
+            _currentAttack = null;
+            _hitboxPool.OnEndAttack();
+            _isDashing = false;
+            _isSuspended = false;
+            _onPosture = false;
+            _charging = false;
+            _lastDirectionToTarget = Vector3.zero;
+            _waiting = false;
+            _postureTimer.Stop();
+            MultiplierReset();
+        }
+
         public override void InitializeFeature(Controller controller)
         {
             base.InitializeFeature(controller);
@@ -95,7 +110,7 @@ namespace Movement3D.Gameplay
             if (controller is PlayerController player) animator = player.Animator;
             MultiplierReset();
             CacheBodyParts();
-            _hitboxPool = new(4, this);
+            _hitboxPool = new(4, this, _invoker.PlayerForward);
             resource.OnStun += CancelAttack;
             _postureTimer = new(1);
             _postureTimer.OnTimerStop += () => { Interruption(false); };
@@ -247,11 +262,8 @@ namespace Movement3D.Gameplay
                 }
             }
 
-            FollowUp(closest, attack);
-            
-            if (closest == null) return;
-            
             SuckToTarget(closest, attack);
+            FollowUp(closest, attack);
         }
 
         private void DownAttack()
@@ -265,9 +277,9 @@ namespace Movement3D.Gameplay
 
         private void FollowUp(PlayerController closest, FullAttack attack)
         {
-            if (attack.dashAttack || attack.downAttack) return;
+            if (!attack.followUp) return;
             
-            var followUpForce = attack.followUp;
+            var followUpForce = attack.followUpForce;
             Vector3 direction;
             if (closest == null)
             {
@@ -280,7 +292,7 @@ namespace Movement3D.Gameplay
                 direction = _invoker.PlayerForward.Get();
             }
 
-            _invoker.AddForce.Execute(new(direction, followUpForce, ForceMode.VelocityChange));
+            _invoker.AddForce.Execute(new(direction * followUpForce.x + Vector3.up * followUpForce.y, ForceMode.VelocityChange));
         }
 
         public void Dash()
@@ -326,6 +338,8 @@ namespace Movement3D.Gameplay
         
         private void SuckToTarget(PlayerController target, FullAttack attack)
         {
+            if (target == null) return;
+            
             var targetCenter = target.Invoker.CenterPosition.Get(); 
             var center = _invoker.CenterPosition.Get();
             var distance = (targetCenter - center).With(y: 0).magnitude;

@@ -41,10 +41,12 @@ namespace Movement3D.Gameplay
             _graph = Resources.Load<ScriptableObject>($"ComboGraph/{_graphName}") as ComboContainer;
         }
 
-        private void OnDisable()
+        public override void ResetFeature(ref SharedProperties shared)
         {
-            attack.OnStartAttack -= OnStartAttack;
-            attack.OnEndAttack -= OnEndAttack;
+            _locked = false;
+            _chainTimer.Stop();
+            ClearAttackCache();
+            if(bufferSignal != null) bufferSignal.Clear();
         }
 
         public override void UpdateFeature()
@@ -54,7 +56,7 @@ namespace Movement3D.Gameplay
 
         public override void Apply(ref InputPayload @event)
         {
-            if(_locked || !resource.AbleToAttack) return;
+            if(_locked || (!resource.AbleToAttack && !attack.Waiting)) return;
 
             string signal = @event.Signal;
             if(string.IsNullOrWhiteSpace(signal)) return;
@@ -179,7 +181,7 @@ namespace Movement3D.Gameplay
         private void ClearAttackCache()
         {
             _actualCombo = null;
-            _transitions.Clear();
+            if(_transitions != null) _transitions.Clear();
             currentAttack = null;
             _transition = null;
             _counter = 0;
@@ -195,6 +197,11 @@ namespace Movement3D.Gameplay
         {
             _locked = false;
             _chainTimer.Start();
+        }
+
+        public void ArtificialLock()
+        {
+            _locked = true;
         }
     }
 }

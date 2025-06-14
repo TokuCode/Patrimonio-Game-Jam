@@ -36,6 +36,16 @@ namespace Movement3D.UserInterface
             {
                 _staminaBar.gameObject.SetActive(false);
             };
+            MulticharacterController.Instance.OnSwitchCharacter += OnSwitchCharacter;
+        }
+
+        private void OnSwitchCharacter(PlayerController player)
+        {
+            this.player = player;
+            resource.OnStaminaChanged -= OnUse;
+            player.Dependencies.TryGetFeature(out resource);
+            resource.OnStaminaChanged += OnUse;
+            _followPosition = player.WorldUIPosition;
         }
 
         private void Update()

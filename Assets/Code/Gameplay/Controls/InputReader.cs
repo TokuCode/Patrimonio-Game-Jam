@@ -11,7 +11,8 @@ namespace Movement3D.Gameplay
         PhysicsCheck _physics;
         PlayerController _controller;
 
-        public event Action JumpPressed; 
+        public event Action JumpPressed;
+        public event Action<int> OnSwitch;
         
         public Vector2 MoveDirection { get; private set; }
         public bool Jump { get; private set; }
@@ -26,6 +27,7 @@ namespace Movement3D.Gameplay
             _playerControls = new PlayerControls();
             _playerControls.Enable();
             _playerControls.Gameplay.SetCallbacks(this);
+            MulticharacterController.Instance.OnSwitchCharacter += CacheController;
         }
 
         public void CacheController(PlayerController playerController)
@@ -134,6 +136,16 @@ namespace Movement3D.Gameplay
             }
             
             if(context.canceled && _1sttag == "special") ReleaseCachedTag();
+        }
+
+        public void OnSwitchLeft(InputAction.CallbackContext context)
+        {
+            if(context.performed) OnSwitch?.Invoke(-1);
+        }
+
+        public void OnSwitchRight(InputAction.CallbackContext context)
+        {
+            if(context.performed) OnSwitch?.Invoke(+1);
         }
 
         private void Set3rdLayerTag()

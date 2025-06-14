@@ -26,6 +26,8 @@ namespace Movement3D.Gameplay
         public Transform CameraTrackingTarget => _cameraTrackingTarget;
         [SerializeField] private Transform _lookAtFollow;
         public Transform LookAtFollow => _lookAtFollow;
+        [SerializeField] private Transform _worldUIPosition;
+        public Transform WorldUIPosition => _worldUIPosition;
         [SerializeField] private AnimationCurve _suckToTargetEase;
         public AnimationCurve SuckToTargetEase => _suckToTargetEase;
         
@@ -48,7 +50,6 @@ namespace Movement3D.Gameplay
         [SerializeField] private PlayerAnimator _animator;
         public PlayerAnimator Animator => _animator;
         
-        public static PlayerController Singleton { get; private set; }
         private IControls _controls;
         public Pipeline<InputPayload> InputPipeline { get; private set; } = new();
         public Invoker Invoker { get; private set; }
@@ -62,7 +63,6 @@ namespace Movement3D.Gameplay
             _strategyCamera = GameObject.FindGameObjectWithTag("StrategyCam").GetComponent<CinemachineCamera>();
             _immersiveCamera = GameObject.FindGameObjectWithTag("ImmersiveCam").GetComponent<CinemachineCamera>();
             
-            SetSingleton();
             if(_isPlayer) _controls = InputReader.Instance;
             Invoker = new Invoker(this);
             
@@ -73,17 +73,6 @@ namespace Movement3D.Gameplay
                 InputReader.Instance.CacheController(this);
             }
             else _spaitalUI.worldCamera = Camera.main;
-        }
-
-        private void SetSingleton()
-        {
-            if (!_isPlayer) return;
-            
-            if (Singleton != null && Singleton != this)
-            {
-                Destroy(gameObject);
-            }
-            else Singleton = this;
         }
 
         protected override void Update()
@@ -101,7 +90,7 @@ namespace Movement3D.Gameplay
 
         private void ReadInput(UpdateContext context)
         {
-            if (_controls == null) return;
+            if (_controls == null || !gameObject.activeSelf) return;
             
             InputPayload input = new()
             {
@@ -114,6 +103,18 @@ namespace Movement3D.Gameplay
             };
             
             InputPipeline.Process(ref input);
+        }
+
+        public override void Deactivate(out SharedProperties shared)
+        {
+            base.Deactivate(out shared);
+            shared.position = transform.position;
+        }
+
+        public override void Reactivate(SharedProperties shared)
+        {
+            transform.position = shared.position;
+            base.Reactivate(shared);
         }
     }
 }

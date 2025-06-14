@@ -36,6 +36,8 @@ namespace Movement3D.Gameplay
         public AlignCameraAltCommand AlignCameraAlt { get; }
         public LocalScaleHandler ReferencesLocalScale { get; }
         public ColliderCenterHandler ColliderCenter { get; }
+        public KillCommand Kill { get; }
+        public ReviveCommand Revive { get; }
 
         public Invoker(Controller controller)
         {
@@ -72,6 +74,8 @@ namespace Movement3D.Gameplay
             AlignCameraAlt = new(_playerObj, _orientation);
             ReferencesLocalScale = new(_camReference);
             ColliderCenter = new(_collider);
+            Kill = new(playerController);
+            Revive = new(playerController);
         }
 
         public void Update(float deltaTime)
