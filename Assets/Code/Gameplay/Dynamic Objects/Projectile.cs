@@ -67,7 +67,11 @@ namespace Movement3D.Gameplay
             if (!_excludeTag.Contains(other.gameObject.tag) && _includeTag.Contains(other.gameObject.tag))
             {
                 var enemy = other.gameObject.GetComponent<PlayerController>();
-                if (enemy == null) return;
+                if (enemy == null)
+                {
+                    Reset();
+                    return;
+                }
 
                 enemy.Dependencies.TryGetFeature(out Resource resource);
                 resource.Attack(new HitInfo

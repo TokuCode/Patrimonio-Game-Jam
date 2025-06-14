@@ -47,7 +47,6 @@ namespace Movement3D.Gameplay
             _cameraTransform = _main?.transform;
             if (controller is PlayerController { IsPlayer: true } playerController)
             {
-                debug = playerController.IsPlayer;
                 _exploration = playerController.ExplorerCamera;
                 _exploration.Follow = playerController.CameraTrackingTarget; 
                 _combat = playerController.CombatCamera;
@@ -60,6 +59,25 @@ namespace Movement3D.Gameplay
                 _immersive.LookAt = playerController.LookAtFollow;
                 immersiveCamera.SetInput(_immersive.gameObject.GetComponent<CinemachineInputAxisController>());
             }
+        }
+
+        public override void ResetFeature(ref SharedProperties shared)
+        {
+            _lastMoveInput = Vector2.zero;
+            locked = false;
+        }
+
+        public override void ReInitializeFeature(Controller controller, SharedProperties shared)
+        {
+            if (controller is PlayerController { IsPlayer: true } playerController)
+            {
+                _exploration.Follow = playerController.CameraTrackingTarget; 
+                _combat.Follow = playerController.CameraTrackingTarget;
+                _combat.LookAt = playerController.CombatLookAt;
+                _strategy.Follow = playerController.CameraTrackingTarget; 
+                _immersive.Follow = playerController.CameraPosition;
+                _immersive.LookAt = playerController.LookAtFollow;
+            } 
         }
 
         private void Start()

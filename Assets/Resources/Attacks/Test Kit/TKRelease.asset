@@ -19,12 +19,12 @@ MonoBehaviour:
   attacks:
   - bodyPartName: right-hand
     positionOffset: {x: 0, y: 0, z: 0}
-    radius: 0.75
+    radius: 0.5
     tick: 0
     delay: 0
-    duration: 0.75
-    damage: 25
-    knockback: {x: 4, y: 6}
+    duration: 0.5
+    damage: 10
+    knockback: {x: 2, y: 3}
     stunTime: 1.5
     vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   followUp: 0

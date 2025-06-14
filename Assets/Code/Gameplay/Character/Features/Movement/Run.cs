@@ -60,6 +60,17 @@ namespace Movement3D.Gameplay
         [SerializeField] private float _chargeMaxSpeed;
         [SerializeField] private float _chargeAcceleration;
 
+        public override void ResetFeature(ref SharedProperties shared)
+        {
+            if(_speedControl != null) StopCoroutine(_speedControl);
+            _isRunning = false;
+        }
+
+        public override void ReInitializeFeature(Controller controller, SharedProperties shared)
+        {
+            StateManager(true);
+        }
+
         public override void InitializeFeature(Controller controller)
         {
             base.InitializeFeature(controller);

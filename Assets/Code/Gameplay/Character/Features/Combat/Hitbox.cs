@@ -11,6 +11,7 @@ namespace Movement3D.Gameplay
     public class Hitbox
     {
         private Attack _attack;
+        private ForwardHandler _playerForward;
         
         public bool active { get; private set; }
         private StopwatchTimer _timer = new();
@@ -25,8 +26,9 @@ namespace Movement3D.Gameplay
         private VisualEffect _vfx;
         private bool _hasHit;
         
-        public Hitbox(Attack attack)
+        public Hitbox(Attack attack, ForwardHandler forward)
         {
+            _playerForward = forward;
             _attack = attack;
             _excludeTag = new List<string> { attack.gameObject.tag };
             _includeTag = new List<string>(attack.Targeted);
@@ -61,7 +63,10 @@ namespace Movement3D.Gameplay
         {
             if (!active) return default;
 
-            return _bodyPart.position + _hit.positionOffset;
+            var forward = _playerForward.Get();
+            var offset = forward * _hit.positionOffset.z + Vector3.up * _hit.positionOffset.y + Vector3.Cross(Vector3.up, forward) * _hit.positionOffset.x;
+
+            return _bodyPart.position + offset;
         }
 
         public void CheckHit()
@@ -94,7 +99,7 @@ namespace Movement3D.Gameplay
             if (enemy == null) return;
             
             enemy.Dependencies.TryGetFeature(out Resource resource);
-            if(resource == null) return;
+            if(resource == null || _attack.CurrentAttack == null) return;
             resource.Attack(new HitInfo
             {
                 priority = _attack.CurrentAttack.priority,
@@ -149,13 +154,13 @@ namespace Movement3D.Gameplay
         private List<Hitbox> _activeHitboxes = new();
         private Attack _attack;
         
-        public HitboxPool(int prewarm, Attack attack)
+        public HitboxPool(int prewarm, Attack attack, ForwardHandler forward)
         {
             _attack = attack;
             
             Hitbox CreateFunc()
             {
-                return new Hitbox(attack);
+                return new Hitbox(attack, forward);
             }
 
             void OnGet(Hitbox hitbox)

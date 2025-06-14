@@ -53,6 +53,11 @@ namespace Movement3D.Gameplay
             animator.SetBool("Freeze", freeze);
         }
 
+        public void Death()
+        {
+            animator.SetTrigger("Death");
+        }
+
         public void EmoteHappy() => animator.SetTrigger("Happy");
         public void EmoteScary() => animator.SetTrigger("Scary");
         public void EmoteCombat() => animator.SetTrigger("Combat");

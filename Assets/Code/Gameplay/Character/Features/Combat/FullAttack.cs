@@ -12,9 +12,10 @@ namespace Movement3D.Gameplay
         public int priority; //More priority, less possibility to be canceled and to cancel incoming attacks
         
         public List<SingleHit> attacks;
-        
-        [Header("Follow Up Effect")]
-        public float followUp;
+
+        [Header("Follow Up Effect")] 
+        public bool followUp;
+        public Vector2 followUpForce;
         [Header("Suck To Target Effect")]
         public bool suckToTarget;
         [Header("Charged Attack Effect")]

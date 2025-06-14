@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a66cc3a9994eeb8830b01589574892, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 12
+  _speed: 18
   _lifeSpan: 5
   _hit:
     bodyPartName: 
@@ -162,7 +162,7 @@ MonoBehaviour:
     knockback: {x: 4, y: 6}
     stunTime: 1.5
     vfxPrefab: {fileID: 0}
-  _vfxPrefab: {fileID: 0}
+  _vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   _solid:
     serializedVersion: 2
     m_Bits: 5120

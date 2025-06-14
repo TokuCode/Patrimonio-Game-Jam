@@ -5,6 +5,7 @@
         void InitializeFeature(Controller controller);
         void UpdateFeature();
         void FixedUpdateFeature();
-        void ResetFeature();
+        void ResetFeature(ref SharedProperties shared);
+        void ReInitializeFeature(Controller controller, SharedProperties shared);
     }
 }

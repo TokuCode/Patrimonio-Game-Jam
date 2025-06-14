@@ -26,6 +26,14 @@ namespace Movement3D.Gameplay
         [SerializeField] private bool _blockedHead;
         public bool BlockedHead => _blockedHead;
 
+        public override void ResetFeature(ref SharedProperties shared)
+        {
+            _previousOnSlope = false;
+            _onGround = false;
+            _onSlope = false;
+            _blockedHead = false;
+        }
+
         public override void UpdateFeature()
         {
             GroundCheck();

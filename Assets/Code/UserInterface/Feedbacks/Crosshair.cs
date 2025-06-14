@@ -7,7 +7,7 @@ namespace Movement3D.UserInterface
     public class Crosshair : MonoBehaviour
     {
         private Camera _main;
-        private PlayerController _player;
+        [SerializeField] private PlayerController _player;
         private ThirdPersonCamera _cameraController;
         
         
@@ -28,7 +28,13 @@ namespace Movement3D.UserInterface
         private void Start()
         {
             _main = Camera.main;
-            _player = PlayerController.Singleton;
+            _player.Dependencies.TryGetFeature(out _cameraController);
+            MulticharacterController.Instance.OnSwitchCharacter += OnSwitchCharacter;
+        }
+
+        private void OnSwitchCharacter(PlayerController player)
+        {
+            _player = player;
             _player.Dependencies.TryGetFeature(out _cameraController);
         }
     

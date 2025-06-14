@@ -19,7 +19,7 @@ MonoBehaviour:
   attacks:
   - bodyPartName: right-hand
     positionOffset: {x: 0, y: 0, z: 0}
-    radius: 0.5
+    radius: 0.25
     tick: 0
     delay: 0
     duration: 0.25
