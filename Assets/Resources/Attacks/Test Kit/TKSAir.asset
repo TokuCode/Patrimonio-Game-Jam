@@ -25,7 +25,8 @@ MonoBehaviour:
     duration: 0.1
     damage: 10
     knockback: {x: 3, y: 0}
-    stunTime: 0.5
+    stunPower: 5
+    stunDuration: 1
     vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   - bodyPartName: right-foot
     positionOffset: {x: 0, y: 0, z: 0}
@@ -35,7 +36,8 @@ MonoBehaviour:
     duration: 0.1
     damage: 10
     knockback: {x: 3, y: 0}
-    stunTime: 0.5
+    stunPower: 0
+    stunDuration: 0
     vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   - bodyPartName: left-foot
     positionOffset: {x: 0, y: 0, z: 0}
@@ -45,9 +47,11 @@ MonoBehaviour:
     duration: 0.1
     damage: 10
     knockback: {x: 3, y: 0}
-    stunTime: 0.5
+    stunPower: 0
+    stunDuration: 0
     vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   followUp: 0
+  followUpForce: {x: 0, y: 0}
   suckToTarget: 1
   chargeAttack: 0
   chargeMultiplier: 0

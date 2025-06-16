@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Movement3D.Gameplay
 {
-    public class FirstPersonCamera : Feature
+    public class FirstPersonCamera : PlayerFeature
     {
         private Movement movement;
         private Resource resource;

@@ -2,7 +2,7 @@
 
 namespace Movement3D.Gameplay
 {
-    public class PhysicsCheck : Feature
+    public class PhysicsCheck : PlayerFeature
     {
         private const float ExtraDistanceGround = .01f;
         private const float ExtraDistanceHead = .1f;

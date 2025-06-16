@@ -5,17 +5,11 @@ namespace Movement3D.Gameplay
 {
     public abstract class Feature : MonoBehaviour, IFeature, IProcess<InputPayload>
     {
-        protected Invoker _invoker;
         protected IDependencyManager _dependencies; 
         
         public virtual void InitializeFeature(Controller controller)
         {
-            if (controller is PlayerController player)
-            {
-                _invoker = player.Invoker;
-                _dependencies = player.Dependencies;
-                player.InputPipeline.Register(this);
-            }
+            _dependencies = controller.Dependencies;
         }
 
         public virtual void UpdateFeature(){ }

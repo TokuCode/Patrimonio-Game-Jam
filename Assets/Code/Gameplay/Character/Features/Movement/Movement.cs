@@ -2,11 +2,12 @@
 
 namespace Movement3D.Gameplay
 {
-    public class Movement : Feature
+    public class Movement : PlayerFeature
     {
         private PhysicsCheck physics;
         private Jump jump;
         private Run run;
+        private Resource resource;
     
         [Header("Movement Parameters")]
         [SerializeField] private float _airMultiplier;
@@ -24,12 +25,13 @@ namespace Movement3D.Gameplay
             Free();
         }
 
-        public override void InitializeFeature(Controller controller) //TODO Add Stun Check
+        public override void InitializeFeature(Controller controller)
         {
             base.InitializeFeature(controller);
             _dependencies.TryGetFeature(out physics);
             _dependencies.TryGetFeature(out jump);
             _dependencies.TryGetFeature(out run);
+            _dependencies.TryGetFeature(out resource);
         }
     
         public override void FixedUpdateFeature()
@@ -49,7 +51,7 @@ namespace Movement3D.Gameplay
 
         private void Move(Vector2 moveDirection)
         {
-            if (_isMovementBlocked) return;
+            if (_isMovementBlocked || resource.isStunned) return;
             
             Vector3 forward = _invoker.Forward.Get();
             Vector3 right = _invoker.Right.Get();
