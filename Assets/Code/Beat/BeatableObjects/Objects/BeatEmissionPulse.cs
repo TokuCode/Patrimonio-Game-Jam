@@ -4,14 +4,16 @@ namespace Movement3D.Beat
 {
     public class BeatEmissionPulse : BeatReaction<float>
     {
-        [SerializeField] private Renderer targetRenderer;
-        [SerializeField] private Color baseEmissionColor = Color.white;
+        private Renderer targetRenderer;
+        private Color baseEmissionColor = Color.white;
 
         private Material mat;
 
         protected override void Start()
         {
+            targetRenderer = GetComponent<Renderer>();
             mat = targetRenderer.material;
+            baseEmissionColor = mat.color;
             mat.EnableKeyword("_EMISSION");
             base.Start();
         }

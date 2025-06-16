@@ -1,0 +1,16 @@
+{
+    "name": "Movement3D.Audio",
+    "rootNamespace": "Movement3D.Audio",
+    "references": [
+        "GUID:111e3e1cf1ddc954ab8a976694f4bf17"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

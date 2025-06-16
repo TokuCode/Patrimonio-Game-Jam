@@ -1,7 +1,10 @@
 {
     "name": "Movement3D.Beat",
     "rootNamespace": "Movement3D.Beat",
-    "references": [],
+    "references": [
+        "GUID:111e3e1cf1ddc954ab8a976694f4bf17",
+        "GUID:426a8dcb6dade194ea69a458e4e50120"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

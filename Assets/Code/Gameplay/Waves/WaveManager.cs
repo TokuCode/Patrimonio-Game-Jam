@@ -1,60 +1,51 @@
-using System.Collections;
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Movement3D.Gameplay
 {
     public class WaveManager : MonoBehaviour
     {
-        [SerializeField] private Transform[] spawnPoints;
-        [SerializeField] private float waveDelay = 5f;
-        [SerializeField] private List<GameObject> enemyPrefabs;
-        
-        private int enemiesAlive = 0;
+        [Header("Waves Data")]
+        [SerializeField] private List<WaveConfig> waveConfigs;
 
-        public void Start()
+        [Header("Spawn Settings")]
+        [SerializeField] private Transform[] enemySpawnPoints;
+        [SerializeField] private float waveDelay;
+        
+        [Header("Status")]
+        [SerializeField] private int currentWaveIndex;
+        [SerializeField] private int enemiesAlive;
+
+        private void Start()
         {
             StartCoroutine(RunWaves());
         }
 
         private IEnumerator RunWaves()
         {
-            int waveNumber = 1;
-
-            while (true) // Infinite loop
+            foreach (var config in waveConfigs)
             {
-                yield return new WaitForSeconds(1f);
-                yield return StartCoroutine(SpawnWaveProcedurally(waveNumber));
+                for (int phaseIndex = 0; phaseIndex < config.phases.Count; phaseIndex++)
+                {
+                    WavePhase phase = config.phases[phaseIndex];
 
-                while (enemiesAlive > 0)
-                    yield return null;
+                    foreach (var enemyInfo in phase.enemies)
+                    {
+                        for (int i = 0; i < enemyInfo.count; i++)
+                        {
+                            Transform spawnPoint = enemySpawnPoints[Random.Range(0, enemySpawnPoints.Length)];
+                            GameObject enemy = ObjectPoolManager.Instance.Get(enemyInfo.enemy, spawnPoint.position, spawnPoint.rotation);
+                            enemiesAlive++;
+                            yield return new WaitForSeconds(phase.spawnDelay);
+                        }
+                    }
 
-                waveNumber++;
-                yield return new WaitForSeconds(waveDelay);
+                    yield return new WaitUntil(() => enemiesAlive <= 0);
+                }
+
+                yield return new WaitForSeconds(config.postWaveRestTime);
             }
-        }
-
-        private IEnumerator SpawnWaveProcedurally(int waveNumber)
-        {
-            int totalEnemies = 5 + waveNumber * 2;
-            float spawnDelay = Mathf.Max(0.5f, 2f - waveNumber * 0.05f); // get faster over time
-
-            for (int i = 0; i < totalEnemies; i++)
-            {
-                GameObject prefabToSpawn = ChooseEnemyForWave(waveNumber);
-                Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-                
-                //GameObject enemy = ObjectPoolManager.Instance.Get(prefabToSpawn, spawnPoint.position, Quaternion.identity);
-
-                enemiesAlive++;
-                yield return new WaitForSeconds(spawnDelay);
-            }
-        }
-        
-        private GameObject ChooseEnemyForWave(int waveNumber)
-        {
-            int maxIndex = Mathf.Min(waveNumber / 5, enemyPrefabs.Count - 1);
-            return enemyPrefabs[Random.Range(0, maxIndex + 1)];
         }
     }
 }

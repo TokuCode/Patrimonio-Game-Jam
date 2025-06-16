@@ -1,4 +1,5 @@
 ﻿using System;
+using Movement3D.Beat;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Movement3D.Helpers;
