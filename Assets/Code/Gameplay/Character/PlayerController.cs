@@ -1,4 +1,6 @@
-﻿using Movement3D.Helpers;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Movement3D.Helpers;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -8,8 +10,6 @@ namespace Movement3D.Gameplay
     {
         [SerializeField] private string _playerName;
         public string Name => _playerName;
-        [SerializeField] private bool _isPlayer;
-        public bool IsPlayer => _isPlayer;
         [SerializeField] private Transform _orientation;
         public Transform Orientation => _orientation;
         [SerializeField] private Transform _playerObj;
@@ -39,11 +39,6 @@ namespace Movement3D.Gameplay
         public CinemachineCamera StrategyCamera => _strategyCamera;
         private CinemachineCamera _immersiveCamera;
         public CinemachineCamera ImmersiveCamera => _immersiveCamera;
-
-        [SerializeField] private Canvas _spaitalUI;
-        [SerializeField] private FloatingText _damageNumber;
-        public FloatingText DamageNumber => _damageNumber;
-        
         public CapsuleCollider Capsule { get; private set; }
         public Rigidbody Rigidbody { get; private set; }
         
@@ -52,10 +47,12 @@ namespace Movement3D.Gameplay
         
         private IControls _controls;
         public Pipeline<InputPayload> InputPipeline { get; private set; } = new();
-        public Invoker Invoker { get; private set; }
+        public PlayerInvoker Invoker { get; private set; }
+        protected List<PlayerFeature> _features;
 
-        protected override void Awake()
+        private void Awake()
         {
+            _features = GetComponents<PlayerFeature>().ToList();
             Capsule = GetComponent<CapsuleCollider>();
             Rigidbody = GetComponent<Rigidbody>();
             _explorerCamera = GameObject.FindGameObjectWithTag("ExplorationCam").GetComponent<CinemachineCamera>();
@@ -63,28 +60,38 @@ namespace Movement3D.Gameplay
             _strategyCamera = GameObject.FindGameObjectWithTag("StrategyCam").GetComponent<CinemachineCamera>();
             _immersiveCamera = GameObject.FindGameObjectWithTag("ImmersiveCam").GetComponent<CinemachineCamera>();
             
-            if(_isPlayer) _controls = InputReader.Instance;
-            Invoker = new Invoker(this);
+            _controls = InputReader.Instance;
+            Invoker = new PlayerInvoker(this);
             
-            base.Awake();
-            if (_isPlayer)
+            foreach (var feature in _features)
             {
-                _spaitalUI.gameObject.SetActive(false);
-                InputReader.Instance.CacheController(this);
+                Dependencies.TryAddFeature(feature);
             }
-            else _spaitalUI.worldCamera = Camera.main;
+            
+            foreach (var feature in _features)
+            {
+                feature.InitializeFeature(this);
+            }             
+            
+            InputReader.Instance.CacheController(this);
         }
 
-        protected override void Update()
+        private void Update()
         {
-            base.Update();
+            foreach (var feature in _features)
+            {
+                feature.UpdateFeature();
+            }
             ReadInput(UpdateContext.Update);
             Invoker.Update(Time.deltaTime);
         }
 
-        protected override void FixedUpdate()
+        private void FixedUpdate()
         {
-            base.FixedUpdate();
+            foreach (var feature in _features)
+            {
+                feature.FixedUpdateFeature();
+            }
             ReadInput(UpdateContext.FixedUpdate);
         }
 
@@ -107,14 +114,29 @@ namespace Movement3D.Gameplay
 
         public override void Deactivate(out SharedProperties shared)
         {
-            base.Deactivate(out shared);
+            shared = new SharedProperties();
+            foreach (var feature in _features)
+            {
+                feature.ResetFeature(ref shared);
+            }
+            
+            gameObject.SetActive(false); 
             shared.position = transform.position;
+            shared.direction = _playerObj.forward;
+            Invoker.Velocity.Execute(Vector3.zero);
         }
 
         public override void Reactivate(SharedProperties shared)
         {
             transform.position = shared.position;
-            base.Reactivate(shared);
+            _playerObj.forward = shared.direction;
+            _orientation.forward = shared.direction;
+            gameObject.SetActive(true);
+            
+            foreach (var feature in _features)
+            {
+                feature.ReInitializeFeature(this, shared);
+            }
         }
     }
 }

@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using DG.Tweening;
 using Movement3D.Helpers;
 using UnityEngine;
 
 namespace Movement3D.Gameplay
 {
-    public class Attack : Feature, IProcess<HitInfo>
+    public class Attack : PlayerFeature, IProcess<HitInfo>
     {
         private const int postureDefensiveMaxSpan = 10;
         
@@ -24,6 +22,7 @@ namespace Movement3D.Gameplay
         private Resource resource;
         private PhysicsCheck physics;
         private ComboReader combo;
+        private Attributes attributes;
         
         [SerializeField] private BodyPart[] _bodyParts;
         public Dictionary<string, Transform> _bodyPartsDictionary = new();
@@ -107,10 +106,11 @@ namespace Movement3D.Gameplay
             _dependencies.TryGetFeature(out resource);
             _dependencies.TryGetFeature(out physics);
             _dependencies.TryGetFeature(out combo);
+            _dependencies.TryGetFeature(out attributes);
             if (controller is PlayerController player) animator = player.Animator;
             MultiplierReset();
             CacheBodyParts();
-            _hitboxPool = new(4, this, _invoker.PlayerForward);
+            _hitboxPool = new(4, this, attributes, _invoker.PlayerForward);
             resource.OnStun += CancelAttack;
             _postureTimer = new(1);
             _postureTimer.OnTimerStop += () => { Interruption(false); };
@@ -232,18 +232,18 @@ namespace Movement3D.Gameplay
             var collissions = Physics.OverlapSphere(floorPosition, range, _attackLayer);
 
             float closestDistance = float.MaxValue;
-            PlayerController closest = null;
+            EnemyController closest = null;
             foreach (var collission in collissions)
             {
                 string tag = collission.gameObject.tag;
 
                 if (gameObject.CompareTag(tag) || !_targetedTags.Contains(tag)) continue; 
                 
-                var temp = collission.GetComponent<PlayerController>();
+                var temp = collission.GetComponent<EnemyController>();
                 
                 if(temp == null) continue;
 
-                var centerTarget = temp.Invoker.CenterPosition.Get();
+                var centerTarget = temp.Invoker.Center.Get();
                 var center = _invoker.CenterPosition.Get();
                 var directionToTarget = (centerTarget - center).With(y: 0).normalized;
                 var distance = Vector3.Distance(center, centerTarget);
@@ -275,7 +275,7 @@ namespace Movement3D.Gameplay
             _invoker.AddForce.Execute(new(Vector3.down, _currentAttack.downImpulse, ForceMode.VelocityChange));
         }
 
-        private void FollowUp(PlayerController closest, FullAttack attack)
+        private void FollowUp(EnemyController closest, FullAttack attack)
         {
             if (!attack.followUp) return;
             
@@ -299,7 +299,7 @@ namespace Movement3D.Gameplay
         {
             if(!IsAttacking || _currentAttack == null) return;
 
-            if (tick != _currentAttack.dashTick) return;
+            if (tick != _currentAttack.dashTick || !_currentAttack.dashAttack) return;
             
             var direction = _invoker.PlayerForward.Get();
             _invoker.AddForce.Execute(new(direction, _currentAttack.dashImpulse, ForceMode.Acceleration));
@@ -317,14 +317,14 @@ namespace Movement3D.Gameplay
 
             bool chain = _currentAttack.chainEffects && tick == _currentAttack.chainTick;
 
-            projectile.Init(shootPosition, _lastDirectionToTarget != Vector3.zero ? _lastDirectionToTarget : forward, _currentAttack.priority, this, chain);
+            projectile.Init(shootPosition, _lastDirectionToTarget != Vector3.zero ? _lastDirectionToTarget : forward, _currentAttack.priority, this, attributes, chain);
         }
 
-        private Vector3 GetTargetOutPosition(PlayerController target)
+        private Vector3 GetTargetOutPosition(EnemyController target)
         {
             var radius = _invoker.Radius.Get();
-            var targetCenter = target.Invoker.CenterPosition.Get(); 
-            var targetFloor = target.Invoker.FloorPosition.Get();
+            var targetCenter = target.Invoker.Center.Get(); 
+            var targetFloor = target.Invoker.Position.Get();
             var center = _invoker.CenterPosition.Get();
             var directionFromTarget = (center - targetCenter).With(y: 0).normalized;
             return targetFloor + directionFromTarget * radius;
@@ -336,23 +336,34 @@ namespace Movement3D.Gameplay
             return distance;
         }
         
-        private void SuckToTarget(PlayerController target, FullAttack attack)
+        private void SuckToTarget(EnemyController target, FullAttack attack)
         {
             if (target == null) return;
             
-            var targetCenter = target.Invoker.CenterPosition.Get(); 
+            var targetCenter = target.Invoker.Center.Get(); 
             var center = _invoker.CenterPosition.Get();
             var distance = (targetCenter - center).With(y: 0).magnitude;
             var directionToTarget = (targetCenter - center).With(y: 0).normalized;
 
             _invoker.Forward.Execute(directionToTarget);
             _invoker.PlayerForward.Execute(directionToTarget);
-            
-            if(distance >= _minRange && attack.suckToTarget) _invoker.SuckToTarget.Execute(new SuckToTargetParams
-            {
-                position = GetTargetOutPosition(target),
-                duration = _suckToTargetduration
-            });
+
+            if(distance >= _minRange && attack.suckToTarget){
+                target.Dependencies.TryGetFeature(out EnemyMovement enemyMove);
+                target.Dependencies.TryGetFeature(out EnemyResource enemyResource);
+                enemyMove.StopMovement();
+                
+                _invoker.SuckToTarget.Execute(new SuckToTargetParams
+                {
+                    position = GetTargetOutPosition(target),
+                    duration = _suckToTargetduration,
+                    callback = () =>
+                    {
+                        if (enemyResource.isStunned) return;
+                        enemyMove.ResumeMovement();
+                    }
+                });
+            }
             
             _lastDirectionToTarget = directionToTarget;
         }
@@ -463,7 +474,8 @@ namespace Movement3D.Gameplay
         [Header("Effects")]
         public float damage;
         public Vector2 knockback;
-        public float stunTime;
+        public float stunPower;
+        public float stunDuration;
         
         //Visual
         [Header("Visual")] 
@@ -478,5 +490,6 @@ namespace Movement3D.Gameplay
         public int priority;
         public bool projectile;
         public bool success;
+        public bool stunSuccess;
     }
 }

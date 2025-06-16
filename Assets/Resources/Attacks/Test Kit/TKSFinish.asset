@@ -25,7 +25,8 @@ MonoBehaviour:
     duration: 0.45
     damage: 25
     knockback: {x: 5, y: 3}
-    stunTime: 1.5
+    stunPower: 5
+    stunDuration: 1
     vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   followUp: 0
   followUpForce: {x: 0, y: 0}

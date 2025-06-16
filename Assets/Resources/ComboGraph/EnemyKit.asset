@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a37019ed594d4c73b1f6e2042da6fa7d, type: 3}
+  m_Name: EnemyKit
+  m_EditorClassIdentifier: 
+  nodes:
+  - nodeGuid:
+      Part1: 784426890
+      Part2: 1237065631
+      Part3: 2096336261
+      Part4: 2739107545
+    nodeName: Special
+    attacks:
+    - EnemySpecial
+    position: {x: 334, y: 289}
+    isEntryPoint: 0
+  - nodeGuid:
+      Part1: 518918694
+      Part2: 1119988523
+      Part3: 3750838172
+      Part4: 3499842400
+    nodeName: ENTRYPOINT
+    attacks: []
+    position: {x: 100, y: 200}
+    isEntryPoint: 1
+  - nodeGuid:
+      Part1: 1606467580
+      Part2: 1285776383
+      Part3: 3630752678
+      Part4: 223910882
+    nodeName: Attack
+    attacks:
+    - EnemyAttack
+    position: {x: 334, y: 77}
+    isEntryPoint: 0
+  links:
+  - sourceNodeGuid:
+      Part1: 518918694
+      Part2: 1119988523
+      Part3: 3750838172
+      Part4: 3499842400
+    targetNodeGuid:
+      Part1: 1606467580
+      Part2: 1285776383
+      Part3: 3630752678
+      Part4: 223910882
+    tag: attack
+  - sourceNodeGuid:
+      Part1: 518918694
+      Part2: 1119988523
+      Part3: 3750838172
+      Part4: 3499842400
+    targetNodeGuid:
+      Part1: 784426890
+      Part2: 1237065631
+      Part3: 2096336261
+      Part4: 2739107545
+    tag: special

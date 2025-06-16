@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Movement3D.Gameplay
 {
-    public class Invoker
+    public class PlayerInvoker : Invoker
     {
         private readonly PlayerController player;
 
@@ -39,7 +39,7 @@ namespace Movement3D.Gameplay
         public KillCommand Kill { get; }
         public ReviveCommand Revive { get; }
 
-        public Invoker(Controller controller)
+        public PlayerInvoker(Controller controller)
         {
             if(controller is not PlayerController playerController) return;
             
@@ -83,4 +83,6 @@ namespace Movement3D.Gameplay
             SuckToTarget.Update(deltaTime);
         }
     }
+
+    public interface Invoker { }
 }

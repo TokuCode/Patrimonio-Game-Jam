@@ -6,7 +6,7 @@ namespace Movement3D.UserInterface
 {
     public class PlayerName : MonoBehaviour
     {
-        [SerializeField] private PlayerController _player;
+        [SerializeField] private Controller _player;
         TextMeshProUGUI _nameText;
 
         private void Awake()
@@ -16,7 +16,8 @@ namespace Movement3D.UserInterface
 
         private void Start()
         {
-            _nameText.text = _player.Name;
+            
+            if(_player is EnemyController enemy) _nameText.text = enemy.Name;
         }
     }
 }

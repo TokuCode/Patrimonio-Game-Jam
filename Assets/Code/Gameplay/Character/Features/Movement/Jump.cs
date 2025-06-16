@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Movement3D.Gameplay
 {
-    public class Jump : Feature
+    public class Jump : PlayerFeature
     {
         private PhysicsCheck physics;
         private Crouch crouch;
@@ -10,9 +10,9 @@ namespace Movement3D.Gameplay
         private PlayerAnimator animator;
         private Resource resource;
         private Attack attack;
+        private Attributes attributes;
     
         [Header("Jump Parameters")]
-        [SerializeField] private float _jumpForce;
         [SerializeField] private float _jumpCooldown;
         [SerializeField] private float _coyoteJumpTime;
         [SerializeField] private float _movementBonus;
@@ -42,11 +42,12 @@ namespace Movement3D.Gameplay
             _dependencies.TryGetFeature(out movement);
             _dependencies.TryGetFeature(out resource);
             _dependencies.TryGetFeature(out attack);
+            _dependencies.TryGetFeature(out attributes);
             if (controller is PlayerController player) animator = player.Animator;
 
             if (controller is PlayerController _player)
-            {
-                if(_player.IsPlayer) InputReader.Instance.JumpPressed += TryJump;
+            { 
+                InputReader.Instance.JumpPressed += TryJump;
             }
         }
         
@@ -82,7 +83,7 @@ namespace Movement3D.Gameplay
             
             float timeSinceGround = Time.time - physics.LastGroundTime;
             bool canJumpInternal = _jumpCooldownTimer <= 0 && timeSinceGround <= _coyoteJumpTime;
-            bool canJumpExternal = !movement.IsMovementBlocked && resource.AbleToJump; //TODO Add Stun
+            bool canJumpExternal = !movement.IsMovementBlocked && resource.AbleToJump && !resource.isStunned;
 
             if (canJumpInternal && canJumpExternal)
             {
@@ -101,7 +102,7 @@ namespace Movement3D.Gameplay
             float multiplier = crouch.IsCrouching ? _crouchMultiplier : 1f;
     
             _invoker.Velocity.Execute(new (velocity.x, 0f, velocity.z));
-            _invoker.AddForce.Execute(new(Vector3.up, (_jumpForce + bonusForce) * multiplier, ForceMode.VelocityChange));
+            _invoker.AddForce.Execute(new(Vector3.up, (attributes.JumpForce + bonusForce) * multiplier, ForceMode.VelocityChange));
         }
     
         private void SetGravityUse()

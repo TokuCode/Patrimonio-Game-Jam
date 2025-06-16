@@ -11,6 +11,7 @@ namespace Movement3D.Gameplay
     public class Hitbox
     {
         private Attack _attack;
+        private Attributes _attributes;
         private ForwardHandler _playerForward;
         
         public bool active { get; private set; }
@@ -26,10 +27,11 @@ namespace Movement3D.Gameplay
         private VisualEffect _vfx;
         private bool _hasHit;
         
-        public Hitbox(Attack attack, ForwardHandler forward)
+        public Hitbox(Attack attack, Attributes attributes, ForwardHandler forward)
         {
             _playerForward = forward;
             _attack = attack;
+            _attributes = attributes;
             _excludeTag = new List<string> { attack.gameObject.tag };
             _includeTag = new List<string>(attack.Targeted);
             _enemyLayer = attack.AttackLayer;
@@ -50,9 +52,11 @@ namespace Movement3D.Gameplay
         public void Init(SingleHit hit)
         {
             _hit = hit;
-            _hit.damage *= _attack.MultiplierDamage;
-            _hit.knockback *= _attack.MultiplierKnockback;
+            _hit.damage *= _attack.MultiplierDamage * _attributes.AttackPower;
+            _hit.knockback *= _attack.MultiplierKnockback * _attributes.KnockbackPower;
             _hit.radius *= _attack.MultiplierScale;
+            _hit.stunPower *= _attributes.StunPower;
+            _hit.stunDuration *= _attributes.StunDurationBoost;
             _vfxPrefab = hit.vfxPrefab;
             _attack._bodyPartsDictionary.TryGetValue(hit.bodyPartName, out _bodyPart);
             _hasHit = false;
@@ -82,7 +86,7 @@ namespace Movement3D.Gameplay
                 
                 if (_excludeTag.Contains(tag) || !_includeTag.Contains(tag)) continue;
 
-                HitEnemy(collider.gameObject.GetComponent<PlayerController>(), position);
+                HitEnemy(collider.gameObject.GetComponent<EnemyController>(), position);
                 
                 hit = true;
             }
@@ -94,19 +98,20 @@ namespace Movement3D.Gameplay
             }
         }
 
-        public void HitEnemy(PlayerController enemy, Vector3 position)
+        public void HitEnemy(EnemyController enemy, Vector3 position)
         {
             if (enemy == null) return;
             
-            enemy.Dependencies.TryGetFeature(out Resource resource);
+            enemy.Dependencies.TryGetFeature(out EnemyResource resource);
             if(resource == null || _attack.CurrentAttack == null) return;
             resource.Attack(new HitInfo
             {
                 priority = _attack.CurrentAttack.priority,
                 hit = _hit,
                 position = position,
+                projectile = false,
                 success = true,
-                projectile = false
+                stunSuccess = true
             });
         }
 
@@ -154,13 +159,13 @@ namespace Movement3D.Gameplay
         private List<Hitbox> _activeHitboxes = new();
         private Attack _attack;
         
-        public HitboxPool(int prewarm, Attack attack, ForwardHandler forward)
+        public HitboxPool(int prewarm, Attack attack, Attributes attributes, ForwardHandler forward)
         {
             _attack = attack;
             
             Hitbox CreateFunc()
             {
-                return new Hitbox(attack, forward);
+                return new Hitbox(attack, attributes, forward);
             }
 
             void OnGet(Hitbox hitbox)

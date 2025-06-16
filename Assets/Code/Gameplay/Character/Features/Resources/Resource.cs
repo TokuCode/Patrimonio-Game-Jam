@@ -4,17 +4,16 @@ using UnityEngine;
 
 namespace Movement3D.Gameplay
 {
-    public class Resource : Feature
+    public class Resource : PlayerFeature
     {
         private Run run;
         private Attack attack;
-        private FloatingText damageNumber;
         private PlayerAnimator animator;
         private Movement movement;
         private ComboReader combo;
+        private Attributes attributes;
         
         [Header("Health")] 
-        [SerializeField] private float _maxHealth;
         [SerializeField] private float _currentHealth;
         public float CurrentHealth => _currentHealth;
         public bool isDead { get; private set; }
@@ -22,7 +21,6 @@ namespace Movement3D.Gameplay
         public CountdownTimer _invincibleTimer;
         [SerializeField] public float _invincibilityTime;
         public Pipeline<HitInfo> pipeline { get; private set; } = new();
-        [SerializeField] private float baseStunTime;
         public bool isStunned { get; private set; }
         private CountdownTimer _stunTimer;
         
@@ -32,7 +30,8 @@ namespace Movement3D.Gameplay
         
         [Header("Stamina")]
         [SerializeField] private float _baseStamina;
-        [SerializeField] private float _minStaminaDelta;
+        public float BaseStamina => _baseStamina;
+        [SerializeField] private float _accumulatorSize;
         [SerializeField] private float _runCost;
         [SerializeField] private float _attackCost;
         [SerializeField] private float _jumpCost;
@@ -61,20 +60,16 @@ namespace Movement3D.Gameplay
             _dependencies.TryGetFeature(out attack);
             _dependencies.TryGetFeature(out movement);
             _dependencies.TryGetFeature(out combo);
-            _currentHealth = _maxHealth;
+            _dependencies.TryGetFeature(out attributes);
+            _currentHealth = attributes.MaxHealth;
             _currentStamina = _baseStamina;
             _staminaTimer = new CountdownTimer(_staminaCooldown);
             _staminaTimer.OnTimerStart = () => { _regen = false; };
             _staminaTimer.OnTimerStop = () => { _regen = true; };
             _invincibleTimer = new CountdownTimer(_invincibilityTime);
             _invincibleTimer.OnTimerStop = () => { isInvincible = false; };
-            _stunTimer = new CountdownTimer(baseStunTime);
+            _stunTimer = new CountdownTimer(1f);
             _stunTimer.OnTimerStop = () => { isStunned = false; };
-            if (controller is PlayerController { IsPlayer: false } player)
-            {
-                damageNumber = player.DamageNumber;
-            }
-
             if (controller is PlayerController playerController)
             {
                 animator = playerController.Animator;
@@ -83,7 +78,11 @@ namespace Movement3D.Gameplay
 
         public override void ResetFeature(ref SharedProperties shared)
         {
-            shared.healthRatio = Mathf.Clamp01(_currentHealth/_maxHealth);
+            if (shared is not PlayerSharedProperties playerShared) return;
+            
+            playerShared.healthRatio = Mathf.Clamp01(_currentHealth/attributes.MaxHealth);
+            playerShared.staminaCount = _currentStamina;
+            playerShared.isDepleted = isDepleted;
             isInvincible = false;
             isDepleted = false;
             isStunned = false;
@@ -96,7 +95,11 @@ namespace Movement3D.Gameplay
 
         public override void ReInitializeFeature(Controller controller, SharedProperties shared)
         {
-            _currentHealth = _maxHealth * shared.healthRatio;
+            if(shared is not PlayerSharedProperties playerShared) return;
+            
+            _currentHealth = attributes.MaxHealth * playerShared.healthRatio;
+            _currentStamina = Mathf.Clamp(playerShared.staminaCount, 0, _baseStamina);
+            isDepleted = playerShared.isDepleted;
         }
 
         public override void UpdateFeature()
@@ -115,10 +118,10 @@ namespace Movement3D.Gameplay
         {
             if (run.IsRunning)
             {
-                _staminaDeltaAccumulator -= _staminaDepletionRate * Time.deltaTime;
+                _staminaDeltaAccumulator -= _staminaDepletionRate * attributes.StaminaCostReduction * Time.deltaTime;
             } else if (_regen && _currentStamina < _baseStamina && !attack.IsAttacking)
             {
-                _staminaDeltaAccumulator += (isDepleted ? _staminaRegenRateDepleted : _staminaRegenRate) * Time.deltaTime;
+                _staminaDeltaAccumulator += (isDepleted ? _staminaRegenRateDepleted : _staminaRegenRate) * attributes.StaminaRegen * Time.deltaTime;
             }
             if (_currentStamina >= _baseStamina) isDepleted = false;
             StaminaDeltaAcumulator();
@@ -126,9 +129,9 @@ namespace Movement3D.Gameplay
 
         private void StaminaDeltaAcumulator()
         { 
-            if (Mathf.Abs(_staminaDeltaAccumulator) > _minStaminaDelta)
+            if (Mathf.Abs(_staminaDeltaAccumulator) > _accumulatorSize)
             {
-                float delta = _minStaminaDelta * Mathf.Sign(_staminaDeltaAccumulator);
+                float delta = _accumulatorSize * Mathf.Sign(_staminaDeltaAccumulator);
                 _staminaDeltaAccumulator -= delta;
                 DeltaStamina(delta);
             }
@@ -159,14 +162,14 @@ namespace Movement3D.Gameplay
         {
             _staminaTimer.Start();
             _regen = false;
-            DeltaStamina(-_attackCost);
+            DeltaStamina(-_attackCost * attributes.StaminaCostReduction);
         }
 
         public void OnJumpStamina()
         {
             _staminaTimer.Start();
             _regen = false;
-            DeltaStamina(-_jumpCost);
+            DeltaStamina(-_jumpCost * attributes.StaminaCostReduction);
         }
 
         public void BasicAttack(float damage, float multiplier = 3)
@@ -184,11 +187,11 @@ namespace Movement3D.Gameplay
             if (!hitInfo.success) return;
             
             Damage(hitInfo.hit.damage);
-            if (attack.PriorityCheck(hitInfo.priority))
-            {
-                Stun(hitInfo.hit.stunTime / baseStunTime); 
-                Knockback(hitInfo);
-            }
+
+            if (!hitInfo.stunSuccess || !attack.PriorityCheck(hitInfo.priority)) return;
+            
+            Stun(hitInfo.hit.stunDuration); 
+            Knockback(hitInfo);
         }
 
         public void Damage(float damage)
@@ -210,26 +213,25 @@ namespace Movement3D.Gameplay
                 _invincibleTimer.Start();
             }
             
-            _currentHealth = Mathf.Clamp(_currentHealth, 0, _maxHealth);
+            _currentHealth = Mathf.Clamp(_currentHealth, 0, attributes.MaxHealth);
 
             var delta = new Delta
             {
                 delta = startHealth - _currentHealth,
-                newRatio = Mathf.Clamp01(_currentHealth / _maxHealth),
+                newRatio = Mathf.Clamp01(_currentHealth / attributes.MaxHealth),
             };
             if (delta.delta != 0)
             {
                 OnHealthChanged?.Invoke(delta);
-                if(damageNumber != null) damageNumber.Init((int)delta.delta);
             }
         }
 
-        public void Stun(float multiplier = 1)
+        public void Stun(float stunDuration)
         {
-            if (multiplier <= 0) return;
+            if (stunDuration <= 0) return;
             
             isStunned = true;
-            _stunTimer.Reset(baseStunTime * multiplier);
+            _stunTimer.Reset(stunDuration);
             _stunTimer.Start();
             
             OnStun?.Invoke();

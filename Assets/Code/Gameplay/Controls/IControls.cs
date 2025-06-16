@@ -17,6 +17,7 @@ namespace Movement3D.Gameplay
         public bool Run;
         public bool Crouch;
         public string Signal;
+        
         public UpdateContext Context;
     }
     
