@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Movement3D.Gameplay
 {
-    public class Run : Feature
+    public class Run : PlayerFeature
     {
         public enum State
         {
@@ -22,6 +22,7 @@ namespace Movement3D.Gameplay
         private PlayerAnimator animator;
         private Resource resource;
         private Attack attack;
+        private Attributes attributes;
 
         [Header("Runtime")]
         [SerializeField] private float _currentMaxSpeed;
@@ -80,6 +81,7 @@ namespace Movement3D.Gameplay
             _dependencies.TryGetFeature(out movement);
             _dependencies.TryGetFeature(out resource);
             _dependencies.TryGetFeature(out attack);
+            _dependencies.TryGetFeature(out attributes);
             if (controller is PlayerController player) animator = player.Animator;
             
             StateManager(true);
@@ -155,8 +157,8 @@ namespace Movement3D.Gameplay
             {
                 _state = State.Running;
                 
-                _desiredMaxSpeed = _runMaxSpeed;
-                acceleration = _runAcceleration;
+                _desiredMaxSpeed = _runMaxSpeed * attributes.RunSpeed;
+                acceleration = _runAcceleration * attributes.RunAcceleration;
                 enableTransition = true;
             }
 
@@ -164,8 +166,8 @@ namespace Movement3D.Gameplay
             {
                 _state = State.Walking;
                 
-                _desiredMaxSpeed = _walkMaxSpeed;
-                acceleration = _walkAcceleration;
+                _desiredMaxSpeed = _walkMaxSpeed * attributes.Speed;
+                acceleration = _walkAcceleration * attributes.Acceleration;
                 enableTransition = true;
             }
             

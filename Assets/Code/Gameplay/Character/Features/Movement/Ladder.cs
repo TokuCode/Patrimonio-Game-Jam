@@ -2,7 +2,7 @@
 
 namespace Movement3D.Gameplay
 {
-    public class Ladder : Feature
+    public class Ladder : PlayerFeature
     { 
         private const float ExtraOffsetRaycastForward = .1f;
         private const float ExtraOffsetRaycastUp = .1f;

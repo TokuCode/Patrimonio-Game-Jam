@@ -4,14 +4,15 @@ using Movement3D.Helpers;
 
 namespace Movement3D.Gameplay
 {
-    public class ThirdPersonCamera : Feature
+    public class ThirdPersonCamera : PlayerFeature
     {
         public enum CameraStyle
         {
             Exploration,
             Combat,
             Strategy,
-            Immersive
+            Immersive,
+            Enemy
         }
         
         private Camera _main;
@@ -45,7 +46,7 @@ namespace Movement3D.Gameplay
             _dependencies.TryGetFeature(out immersiveCamera);
             _main = Camera.main;
             _cameraTransform = _main?.transform;
-            if (controller is PlayerController { IsPlayer: true } playerController)
+            if (controller is PlayerController playerController)
             {
                 _exploration = playerController.ExplorerCamera;
                 _exploration.Follow = playerController.CameraTrackingTarget; 
@@ -69,7 +70,7 @@ namespace Movement3D.Gameplay
 
         public override void ReInitializeFeature(Controller controller, SharedProperties shared)
         {
-            if (controller is PlayerController { IsPlayer: true } playerController)
+            if (controller is PlayerController playerController)
             {
                 _exploration.Follow = playerController.CameraTrackingTarget; 
                 _combat.Follow = playerController.CameraTrackingTarget;
@@ -109,7 +110,7 @@ namespace Movement3D.Gameplay
             if(locked) return;
             
             if(moveDirection != Vector2.zero) _lastMoveInput = moveDirection;
-
+            
             if (_cameraStyle is CameraStyle.Exploration or CameraStyle.Strategy)
             {
                 RotateCameraFreeLookAt(moveDirection);
@@ -117,6 +118,10 @@ namespace Movement3D.Gameplay
             else if (_cameraStyle == CameraStyle.Combat)
             {
                 RotateCameraHardLookAt();
+            }
+            else if (_cameraStyle == CameraStyle.Enemy)
+            {
+                RotateCameraEnemyLookAt(moveDirection);
             }
         }
 
@@ -149,6 +154,16 @@ namespace Movement3D.Gameplay
             _invoker.Forward.Execute(dirToCombatLookAt);
                 
             _invoker.PlayerForward.Execute(dirToCombatLookAt); 
+        }
+
+        private void RotateCameraEnemyLookAt(Vector2 moveDirection)
+        {
+            var forward = _invoker.Forward.Get();
+            var right = _invoker.Right.Get();
+            var moveIntent = (forward * moveDirection.y + right * moveDirection.x).normalized;
+            
+            _invoker.Forward.Execute(moveIntent);
+            _invoker.PlayerForward.Execute(moveIntent); 
         }
 
         public void SetCameraStyle(CameraStyle cameraStyle)

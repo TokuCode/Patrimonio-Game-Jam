@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using System;
+using DG.Tweening;
 using Movement3D.Helpers;
 using UnityEngine;
 
@@ -300,6 +301,7 @@ namespace Movement3D.Gameplay
     {
         public Vector3 position;
         public float duration;
+        public Action callback;
     }
 
     public class SuckToTargetCommand : ICommand<SuckToTargetParams>
@@ -310,6 +312,7 @@ namespace Movement3D.Gameplay
         private StopwatchTimer timer;
         private Vector3 target;
         private float duration;
+        private Action callback;
 
         public SuckToTargetCommand(Rigidbody rigidbody, AnimationCurve curve)
         {
@@ -328,14 +331,19 @@ namespace Movement3D.Gameplay
             timer.Start();
             target = args.position;
             duration = args.duration;
+            callback = args.callback;
             rigidbody.isKinematic = true;
         }
 
         public void Update(float deltaTime)
         {
             timer.Tick(deltaTime);
-            
-            if(timer.GetTime() >= duration) timer.Stop();
+
+            if (timer.GetTime() >= duration)
+            {
+                timer.Stop();
+                callback?.Invoke();
+            }
             
             SetPosition();
         }
@@ -434,9 +442,9 @@ namespace Movement3D.Gameplay
 
     public class KillCommand : IRequest<SharedProperties>
     {
-        private PlayerController player;
+        private Controller player;
 
-        public KillCommand(PlayerController player)
+        public KillCommand(Controller player)
         {
             this.player = player;
         }
@@ -448,17 +456,11 @@ namespace Movement3D.Gameplay
         }
     }
 
-    public struct SharedProperties
-    {
-        public float healthRatio;
-        public Vector3 position;
-    }
-
     public class ReviveCommand : ICommand<SharedProperties>
     {
-        private PlayerController player;
+        private Controller player;
 
-        public ReviveCommand(PlayerController player)
+        public ReviveCommand(Controller player)
         {
             this.player = player;
         }

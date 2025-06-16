@@ -46,6 +46,7 @@ namespace Movement3D.UserInterface
             player.Dependencies.TryGetFeature(out resource);
             resource.OnStaminaChanged += OnUse;
             _followPosition = player.WorldUIPosition;
+            SetStaminaBars();
         }
 
         private void Update()
@@ -74,6 +75,15 @@ namespace Movement3D.UserInterface
         {
             Vector2 position = _main.WorldToScreenPoint(_followPosition.transform.position);
             _staminaBar.transform.position = position;
+        }
+
+        private void SetStaminaBars()
+        {
+            float ratio = Mathf.Clamp01(resource.CurrentStamina / resource.BaseStamina);
+            _baseBar.fillAmount = ratio;
+            _delayedBar.fillAmount = ratio;
+            _staminaBar.gameObject.SetActive(true);
+            _showTimer.Start();
         }
 
         private void BaseColor()

@@ -2,11 +2,12 @@
 
 namespace Movement3D.Gameplay
 {
-    public class Crouch : Feature
+    public class Crouch : PlayerFeature
     {
         private PhysicsCheck physics;
         private Movement movement;
         private PlayerAnimator animator;
+        private Resource resource;
         
         [Header("Extra Settings")]
         [SerializeField] private float _crouchColliderCenter;
@@ -24,9 +25,9 @@ namespace Movement3D.Gameplay
         public override void InitializeFeature(Controller controller)
         {
             base.InitializeFeature(controller);
-
             _dependencies.TryGetFeature(out physics);
             _dependencies.TryGetFeature(out movement);
+            _dependencies.TryGetFeature(out resource);
             if (controller is PlayerController player) animator = player.Animator;
             
             _startYScale = _invoker.LocalScale.Get().y;
@@ -48,7 +49,7 @@ namespace Movement3D.Gameplay
 
         private void CheckCrouching(bool crouchInput)
         {
-            bool canCrouch = !movement.IsMovementBlocked; //TODO Add Stun Check
+            bool canCrouch = !movement.IsMovementBlocked && !resource.isStunned;
             
             if(crouchInput && canCrouch && !_isCrouching)
                 CrouchAction();

@@ -24,10 +24,12 @@ MonoBehaviour:
     delay: 0
     duration: 0.5
     damage: 10
-    knockback: {x: 2, y: 3}
-    stunTime: 1.5
+    knockback: {x: 10, y: 5}
+    stunPower: 30
+    stunDuration: 2
     vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   followUp: 0
+  followUpForce: {x: 0, y: 0}
   suckToTarget: 1
   chargeAttack: 0
   chargeMultiplier: 0

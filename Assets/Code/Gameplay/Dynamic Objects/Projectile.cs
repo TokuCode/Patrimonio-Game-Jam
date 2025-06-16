@@ -35,7 +35,7 @@ namespace Movement3D.Gameplay
             _timer.Tick(Time.deltaTime);
         }
 
-        public void Init(Vector3 position, Vector3 direction, int priority, Attack attack, bool chain)
+        public void Init(Vector3 position, Vector3 direction, int priority, Attack attack, Attributes attributes, bool chain)
         {
             _direction = direction.With(y:0).normalized;
             _currentHit = _hit;
@@ -57,6 +57,11 @@ namespace Movement3D.Gameplay
                 attack.MultiplierReset();
             }
 
+            _currentHit.damage *= attributes.AttackPower;
+            _currentHit.knockback *= attributes.KnockbackPower;
+            _currentHit.stunPower *= attributes.StunPower;
+            _currentHit.stunDuration *= attributes.StunDurationBoost;
+
             _timer.Start();
             gameObject.SetActive(true);
             _rigidbody.linearVelocity = _currentSpeed;
@@ -66,21 +71,22 @@ namespace Movement3D.Gameplay
         {
             if (!_excludeTag.Contains(other.gameObject.tag) && _includeTag.Contains(other.gameObject.tag))
             {
-                var enemy = other.gameObject.GetComponent<PlayerController>();
+                var enemy = other.gameObject.GetComponent<EnemyController>();
                 if (enemy == null)
                 {
                     Reset();
                     return;
                 }
 
-                enemy.Dependencies.TryGetFeature(out Resource resource);
+                enemy.Dependencies.TryGetFeature(out EnemyResource resource);
                 resource.Attack(new HitInfo
                 {
                     priority = _priority,
                     hit = _hit,
                     position = transform.position,
+                    projectile = true,
                     success = true,
-                    projectile = true
+                    stunSuccess = true
                 });
                 Reset();
             }

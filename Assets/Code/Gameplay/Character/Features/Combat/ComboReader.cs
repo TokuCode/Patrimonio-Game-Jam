@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Movement3D.Gameplay
 {
-    public class ComboReader : Feature
+    public class ComboReader : PlayerFeature
     {
         private const string nextKeyword = "next";
         

@@ -10,6 +10,7 @@ namespace Movement3D.Gameplay
         [SerializeField] private List<PlayerController> _characters;
         private SharedProperties _lastSharedProperties;
         private PlayerController _currentPlayer;
+        public PlayerController CurrentPlayer => _currentPlayer;
         private int _currentPlayerIndex;
         public event Action<PlayerController> OnSwitchCharacter;
 
