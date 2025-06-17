@@ -3233,7 +3233,7 @@ GameObject:
   - component: {fileID: 6223225375822771747}
   - component: {fileID: 111693032247667421}
   - component: {fileID: 7478250140279694577}
-  - component: {fileID: 4296501216549805261}
+  - component: {fileID: 6324386449526848812}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -3381,7 +3381,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cameraStyle: 0
-  _rotationSpeed: 7
+  _rotationSpeed: 30
   locked: 0
   _cursorVisible: 0
   _cursorLockMode: 1
@@ -3438,6 +3438,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bf4abcdff244aff97b4f8bbbb83d0db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _jumpHeight: 3
   _jumpCooldown: 0.3
   _coyoteJumpTime: 0.1
   _movementBonus: 0.5
@@ -3490,6 +3491,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1846260d67347378e0636f0dd7347bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _crounchEnabled: 0
   _crouchColliderCenter: 0.5
   _isCrouching: 0
   _crouchHeightMultiplier: 0.5
@@ -3554,8 +3556,8 @@ MonoBehaviour:
     m_Bits: 5376
   _aimAngle: 100
   _minRange: 0.1
-  _defaultTargetRadius: 0.5
-  _suckToTargetduration: 0.5
+  _defaultTargetRadius: 1
+  _suckToTargetDuration: 0.2
   _alignDuration: 0.2
   _solid:
     serializedVersion: 2
@@ -3579,7 +3581,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13b03201f46841478f2952079e81ae7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _graphName: Basic
+  _graphName: TestKit
   chainTime: 1
 --- !u!114 &111693032247667421
 MonoBehaviour:
@@ -3593,6 +3595,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 640afaad365b497a833d273956bcec1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _maxHealth: 100
   _currentHealth: 0
   _invincibilityTime: 0.75
   _baseStamina: 100
@@ -3621,7 +3624,13 @@ MonoBehaviour:
   _constitution: 5
   _agility: 5
   _force: 5
---- !u!114 &4296501216549805261
+  _stunResistance: 10
+  _stunDurationReduction: 0
+  _knockbackResistance: 0
+  _damageReduction: 0
+  _staminaCostReduction: 0
+  _staminaRegenMultiplier: 0
+--- !u!114 &6324386449526848812
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3630,9 +3639,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4285371833805494178}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cac19853e1241209673255e7bcea844, type: 3}
+  m_Script: {fileID: 11500000, guid: 0bd3a265c44c48d7989a5f7fb1c4116e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _switchCooldown: 0.5
 --- !u!1 &4324551968026029224
 GameObject:
   m_ObjectHideFlags: 0

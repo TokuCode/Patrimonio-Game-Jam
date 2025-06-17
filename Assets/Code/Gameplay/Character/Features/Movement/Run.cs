@@ -157,8 +157,8 @@ namespace Movement3D.Gameplay
             {
                 _state = State.Running;
                 
-                _desiredMaxSpeed = _runMaxSpeed * attributes.RunSpeed;
-                acceleration = _runAcceleration * attributes.RunAcceleration;
+                _desiredMaxSpeed = _runMaxSpeed;
+                acceleration = _runAcceleration;
                 enableTransition = true;
             }
 
@@ -166,8 +166,8 @@ namespace Movement3D.Gameplay
             {
                 _state = State.Walking;
                 
-                _desiredMaxSpeed = _walkMaxSpeed * attributes.Speed;
-                acceleration = _walkAcceleration * attributes.Acceleration;
+                _desiredMaxSpeed = _walkMaxSpeed;
+                acceleration = _walkAcceleration;
                 enableTransition = true;
             }
             

@@ -11,10 +11,10 @@ namespace Movement3D.Gameplay
         private SingleHit _currentHit;
         private Vector3 _currentSpeed;
         private Vector3 _initialScale;
-        private List<string> _excludeTag = new();
         private List<string> _includeTag = new();
         private int _priority;
         private CountdownTimer _timer;
+        private GameObject _sender;
 
         [Header("Settings")] [SerializeField] private float _speed;
         [SerializeField] private float _lifeSpan;
@@ -35,7 +35,7 @@ namespace Movement3D.Gameplay
             _timer.Tick(Time.deltaTime);
         }
 
-        public void Init(Vector3 position, Vector3 direction, int priority, EnemyAttack attack, EnemyAttributes attributes, bool chain)
+        public void Init(Vector3 position, Vector3 direction, int priority, EnemyAttack attack, EnemyAttributes attributes, bool chain, GameObject sender)
         {
             _direction = direction.With(y:0).normalized;
             _currentHit = _hit;
@@ -44,9 +44,9 @@ namespace Movement3D.Gameplay
             transform.position = position;
             _rigidbody.position = position;
             _currentSpeed = _direction.normalized * _speed;
-            _excludeTag = new List<string> { attack.gameObject.tag };
             _includeTag = new List<string>(attack.Targeted);
             _priority = priority;
+            _sender = sender;
 
             if (chain)
             {
@@ -57,11 +57,6 @@ namespace Movement3D.Gameplay
                 attack.MultiplierReset();
             }
 
-            _currentHit.damage *= attributes.AttackPower;
-            _currentHit.knockback *= attributes.KnockbackPower;
-            _currentHit.stunPower *= attributes.StunPower;
-            _currentHit.stunDuration *= attributes.StunDurationBoost;
-
             _timer.Start();
             gameObject.SetActive(true);
             _rigidbody.linearVelocity = _currentSpeed;
@@ -69,40 +64,44 @@ namespace Movement3D.Gameplay
 
         private void OnCollisionEnter(Collision other)
         {
-            if (!_excludeTag.Contains(other.gameObject.tag) && _includeTag.Contains(other.gameObject.tag))
+            if (other.gameObject != _sender && _includeTag.Contains(other.gameObject.tag))
             {
                 var enemy = other.gameObject.GetComponent<PlayerController>();
-                if (enemy == null)
+                if (enemy != null)
                 {
-                    Reset();
-                    return;
+                    if (enemy.Dependencies.TryGetFeature(out Resource resource))
+                    {
+                        resource.Attack(new HitInfo
+                        {
+                            priority = _priority,
+                            hit = _hit,
+                            position = transform.position,
+                            direction = _direction,
+                            projectile = true,
+                            success = true,
+                            stunSuccess = true
+                        });
+                    }
                 }
 
-                if (enemy.Dependencies.TryGetFeature(out Resource resource))
+                var ally = other.gameObject.GetComponent<EnemyController>();
+                if (ally != null)
                 {
-                    resource.Attack(new HitInfo
+                    if (ally.Dependencies.TryGetFeature(out EnemyResource enemyResource))
                     {
-                        priority = _priority,
-                        hit = _hit,
-                        position = transform.position,
-                        projectile = true,
-                        success = true,
-                        stunSuccess = true
-                    });
+                        enemyResource.Attack(new HitInfo
+                        {
+                            priority = _priority,
+                            hit = _hit,
+                            position = transform.position,
+                            direction = _direction,
+                            projectile = true,
+                            success = true,
+                            stunSuccess = true
+                        }); 
+                    }
                 }
-
-                if (enemy.Dependencies.TryGetFeature(out EnemyResource enemyResource))
-                {
-                    enemyResource.Attack(new HitInfo
-                    {
-                        priority = _priority,
-                        hit = _hit,
-                        position = transform.position,
-                        projectile = true,
-                        success = true,
-                        stunSuccess = true
-                    }); 
-                }
+                other.gameObject.GetComponent<DestroyableProp>()?.Attack(_hit.damage);
                 
                 Reset();
             }

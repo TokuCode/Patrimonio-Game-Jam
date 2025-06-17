@@ -12,8 +12,10 @@ namespace Movement3D.Gameplay
         private Movement movement;
         private ComboReader combo;
         private Attributes attributes;
-        
-        [Header("Health")] 
+
+        [Header("Health")]
+        [SerializeField] private float _maxHealth;
+        public float MaxHealth => _maxHealth;
         [SerializeField] private float _currentHealth;
         public float CurrentHealth => _currentHealth;
         public bool isDead { get; private set; }
@@ -61,7 +63,7 @@ namespace Movement3D.Gameplay
             _dependencies.TryGetFeature(out movement);
             _dependencies.TryGetFeature(out combo);
             _dependencies.TryGetFeature(out attributes);
-            _currentHealth = attributes.MaxHealth;
+            _currentHealth = _maxHealth;
             _currentStamina = _baseStamina;
             _staminaTimer = new CountdownTimer(_staminaCooldown);
             _staminaTimer.OnTimerStart = () => { _regen = false; };
@@ -69,7 +71,10 @@ namespace Movement3D.Gameplay
             _invincibleTimer = new CountdownTimer(_invincibilityTime);
             _invincibleTimer.OnTimerStop = () => { isInvincible = false; };
             _stunTimer = new CountdownTimer(1f);
-            _stunTimer.OnTimerStop = () => { isStunned = false; };
+            _stunTimer.OnTimerStop = () =>
+            {
+                isStunned = false;
+            };
             if (controller is PlayerController playerController)
             {
                 animator = playerController.Animator;
@@ -80,7 +85,7 @@ namespace Movement3D.Gameplay
         {
             if (shared is not PlayerSharedProperties playerShared) return;
             
-            playerShared.healthRatio = Mathf.Clamp01(_currentHealth/attributes.MaxHealth);
+            playerShared.healthRatio = Mathf.Clamp01(_currentHealth/_maxHealth);
             playerShared.staminaCount = _currentStamina;
             playerShared.isDepleted = isDepleted;
             isInvincible = false;
@@ -97,7 +102,7 @@ namespace Movement3D.Gameplay
         {
             if(shared is not PlayerSharedProperties playerShared) return;
             
-            _currentHealth = attributes.MaxHealth * playerShared.healthRatio;
+            _currentHealth = _maxHealth * playerShared.healthRatio;
             _currentStamina = Mathf.Clamp(playerShared.staminaCount, 0, _baseStamina);
             isDepleted = playerShared.isDepleted;
         }
@@ -203,8 +208,6 @@ namespace Movement3D.Gameplay
 
             if (_currentHealth <= 0)
             {
-                isDead = true;
-                OnDie?.Invoke();
                 OnDeath();
             }
             else
@@ -213,12 +216,12 @@ namespace Movement3D.Gameplay
                 _invincibleTimer.Start();
             }
             
-            _currentHealth = Mathf.Clamp(_currentHealth, 0, attributes.MaxHealth);
+            _currentHealth = Mathf.Clamp(_currentHealth, 0, _maxHealth);
 
             var delta = new Delta
             {
                 delta = startHealth - _currentHealth,
-                newRatio = Mathf.Clamp01(_currentHealth / attributes.MaxHealth),
+                newRatio = Mathf.Clamp01(_currentHealth / _maxHealth)
             };
             if (delta.delta != 0)
             {
@@ -241,11 +244,8 @@ namespace Movement3D.Gameplay
         {
             if(!hitInfo.success) return;
             
-            Vector3 attackPoint = hitInfo.position;
-            Vector3 center = _invoker.CenterPosition.Get();
             var knockback = hitInfo.hit.knockback;
-            var direction = (center - attackPoint).With(y: 0).normalized;
-            var force = direction * knockback.x + Vector3.up * knockback.y;
+            var force = hitInfo.direction * knockback.x + Vector3.up * knockback.y;
             
             _invoker.Velocity.Execute(Vector3.zero);
             _invoker.AddForce.Execute(new(force, ForceMode.VelocityChange));
@@ -253,10 +253,10 @@ namespace Movement3D.Gameplay
 
         public void OnDeath()
         {
-            movement.Block();
+            isDead = true;
             combo.ArtificialLock();
-            
             animator.Death();
+            OnDie?.Invoke();
         }
 
         public void EffectiveDeath()

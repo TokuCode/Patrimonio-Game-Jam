@@ -52,11 +52,7 @@ namespace Movement3D.Gameplay
         public void Init(SingleHit hit)
         {
             _hit = hit;
-            _hit.damage *= _attack.MultiplierDamage * _attributes.AttackPower;
-            _hit.knockback *= _attack.MultiplierKnockback * _attributes.KnockbackPower;
             _hit.radius *= _attack.MultiplierScale;
-            _hit.stunPower *= _attributes.StunPower;
-            _hit.stunDuration *= _attributes.StunDurationBoost;
             _vfxPrefab = hit.vfxPrefab;
             _attack._bodyPartsDictionary.TryGetValue(hit.bodyPartName, out _bodyPart);
             _hasHit = false;
@@ -87,6 +83,7 @@ namespace Movement3D.Gameplay
                 if (_excludeTag.Contains(tag) || !_includeTag.Contains(tag)) continue;
 
                 HitEnemy(collider.gameObject.GetComponent<EnemyController>(), position);
+                collider.gameObject.GetComponent<DestroyableProp>()?.Attack(_hit.damage);
                 
                 hit = true;
             }
@@ -109,6 +106,7 @@ namespace Movement3D.Gameplay
                 priority = _attack.CurrentAttack.priority,
                 hit = _hit,
                 position = position,
+                direction = _playerForward.Get(),
                 projectile = false,
                 success = true,
                 stunSuccess = true

@@ -12,6 +12,8 @@ TagManager:
   - ExplorationCam
   - CombatCam
   - StrategyCam
+  - WorldBounds
+  - WorldLimit
   layers:
   - Default
   - TransparentFX

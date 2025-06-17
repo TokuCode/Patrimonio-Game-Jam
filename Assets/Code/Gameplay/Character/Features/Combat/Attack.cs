@@ -47,7 +47,7 @@ namespace Movement3D.Gameplay
         [SerializeField] private float _aimAngle;
         [SerializeField] private float _minRange;
         [SerializeField] private float _defaultTargetRadius;
-        [SerializeField] private float _suckToTargetduration;
+        [SerializeField] private float _suckToTargetDuration;
         [SerializeField] private float _alignDuration;
         [SerializeField] private LayerMask _solid;
 
@@ -322,7 +322,7 @@ namespace Movement3D.Gameplay
 
         private Vector3 GetTargetOutPosition(EnemyController target)
         {
-            var radius = _invoker.Radius.Get();
+            var radius = _defaultTargetRadius;
             var targetCenter = target.Invoker.Center.Get(); 
             var targetFloor = target.Invoker.Position.Get();
             var center = _invoker.CenterPosition.Get();
@@ -349,19 +349,11 @@ namespace Movement3D.Gameplay
             _invoker.PlayerForward.Execute(directionToTarget);
 
             if(distance >= _minRange && attack.suckToTarget){
-                target.Dependencies.TryGetFeature(out EnemyMovement enemyMove);
-                target.Dependencies.TryGetFeature(out EnemyResource enemyResource);
-                enemyMove.StopMovement();
-                
-                _invoker.SuckToTarget.Execute(new SuckToTargetParams
+                _invoker.DynamicSuckToTarget.Execute(new SuckToTargetParams
                 {
-                    position = GetTargetOutPosition(target),
-                    duration = _suckToTargetduration,
-                    callback = () =>
-                    {
-                        if (enemyResource.isStunned) return;
-                        enemyMove.ResumeMovement();
-                    }
+                    target = target.transform,
+                    position = GetTargetOutPosition(target) - target.transform.position,
+                    duration = _suckToTargetDuration
                 });
             }
             
@@ -487,6 +479,7 @@ namespace Movement3D.Gameplay
     {
         public SingleHit hit;
         public Vector3 position;
+        public Vector3 direction;
         public int priority;
         public bool projectile;
         public bool success;

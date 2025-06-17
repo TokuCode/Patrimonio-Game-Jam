@@ -17,6 +17,7 @@ namespace Movement3D.Gameplay
         
         public AddKnockbackAgentCommand Knockback { get; }
         public SetDestinationCommand Destination { get; }
+        public ResetPathCommand ResetPath { get; }
         public SetAgentSpeedCommand AgentSpeed { get; }
         public SetAgentAccelerationCommand AgentAcceleration { get; }
         public SuckToTargetDOTweenEnemy SuckToTarget { get; }
@@ -41,6 +42,7 @@ namespace Movement3D.Gameplay
             Revive = new(enemy);
             Knockback = new(rigidbody, agent, coroutine);
             Destination = new(agent);
+            ResetPath = new(agent, transform);
             AgentSpeed = new(agent);
             AgentAcceleration = new(agent);
             SuckToTarget = new(Ease.OutSine, transform, rigidbody, agent);

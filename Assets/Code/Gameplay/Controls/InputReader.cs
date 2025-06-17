@@ -13,12 +13,11 @@ namespace Movement3D.Gameplay
         PlayerController _controller;
 
         public event Action JumpPressed;
-        public event Action<int> OnSwitch;
-        
         public Vector2 MoveDirection { get; private set; }
         public bool Jump { get; private set; }
         public bool Run { get; private set; }
         public bool Crouch { get; private set; }
+        public int Switch { get; private set; }
         
         public bool Charge { get; private set; }
         private string _1sttag;
@@ -141,12 +140,14 @@ namespace Movement3D.Gameplay
 
         public void OnSwitchLeft(InputAction.CallbackContext context)
         {
-            if(context.performed) OnSwitch?.Invoke(-1);
+            if(context.performed) Switch = 1;
+            else if(context.canceled && Switch == 1) Switch = 0;
         }
 
         public void OnSwitchRight(InputAction.CallbackContext context)
         {
-            if(context.performed) OnSwitch?.Invoke(+1);
+            if(context.performed) Switch = -1;
+            else if(context.canceled && Switch == -1) Switch = 0;
         }
 
         private void Set3rdLayerTag()

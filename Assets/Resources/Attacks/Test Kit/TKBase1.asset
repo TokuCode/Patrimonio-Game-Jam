@@ -15,7 +15,7 @@ MonoBehaviour:
   attackName: TKBase1
   attackRange: 7.5
   animationClip: {fileID: -203655887218126122, guid: b218fa08973fbfe408b77c9384094878, type: 3}
-  priority: 5
+  priority: 10
   attacks:
   - bodyPartName: right-hand
     positionOffset: {x: 0, y: 0, z: 0}
@@ -24,9 +24,9 @@ MonoBehaviour:
     delay: 0
     duration: 0.25
     damage: 10
-    knockback: {x: 4, y: 1}
-    stunPower: 5
-    stunDuration: 1
+    knockback: {x: 2, y: 2}
+    stunPower: 20
+    stunDuration: 0.5
     vfxPrefab: {fileID: 6196526091247122649, guid: 29dd06f85f364e34eb538c141ada307b, type: 3}
   followUp: 0
   followUpForce: {x: 0, y: 0}

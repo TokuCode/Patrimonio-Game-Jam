@@ -173,7 +173,7 @@ namespace Movement3D.Gameplay
 
         public void Execute(Vector3 args)
         {
-            obj.forward = args;
+            if(args != Vector3.zero) obj.forward = args;
         }
     }
     
@@ -302,6 +302,7 @@ namespace Movement3D.Gameplay
         public Vector3 position;
         public float duration;
         public Action callback;
+        public Transform target;
     }
 
     public class SuckToTargetCommand : ICommand<SuckToTargetParams>
@@ -357,6 +358,62 @@ namespace Movement3D.Gameplay
             rigidbody.MovePosition(Vector3.Lerp(rigidbody.position, target, parameterInCurve));
         }
     }
+    
+    public class DynamicSuckToTargetCommand : ICommand<SuckToTargetParams>
+    {
+        private Rigidbody rigidbody;
+        private AnimationCurve curve;
+        
+        private StopwatchTimer timer;
+        private Transform target;
+        private Vector3 offset;
+        private float duration;
+        private Action callback;
+
+        public DynamicSuckToTargetCommand(Rigidbody rigidbody, AnimationCurve curve)
+        {
+            this.rigidbody = rigidbody;
+            this.curve = curve;
+            timer = new StopwatchTimer();
+            timer.OnTimerStop += () =>
+            {
+                this.rigidbody.isKinematic = false;
+            };
+        }
+
+        public void Execute(SuckToTargetParams args)
+        {
+            timer.Reset();
+            timer.Start();
+            offset = args.position;
+            target = args.target;
+            duration = args.duration;
+            callback = args.callback;
+            rigidbody.isKinematic = true;
+        }
+
+        public void Update(float deltaTime)
+        {
+            timer.Tick(deltaTime);
+
+            if (timer.GetTime() >= duration)
+            {
+                timer.Stop();
+                callback?.Invoke();
+            }
+            
+            SetPosition();
+        }
+
+        public void SetPosition()
+        {
+            if(!timer.IsRunning) return;
+            
+            float parameter = Mathf.Clamp01(timer.GetTime() / duration);
+            float parameterInCurve = curve.Evaluate(parameter);
+            rigidbody.MovePosition(Vector3.Lerp(rigidbody.position, target.position + offset, parameterInCurve));
+        }
+    } 
 
     public class SuckToTargetDOTween : ICommand<SuckToTargetParams>
     {

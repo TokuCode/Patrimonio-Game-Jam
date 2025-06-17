@@ -31,6 +31,7 @@ namespace Movement3D.Gameplay
         public PositionHandler CombatLookAtPosition { get; }
         public PositionHandler FloorPosition { get; }
         public SuckToTargetCommand SuckToTarget { get; }
+        public DynamicSuckToTargetCommand DynamicSuckToTarget { get; }
         public SuckToTargetDOTween SuckToTargetAlt { get; }
         public AlignCameraCommand AlignCamera { get; }
         public AlignCameraAltCommand AlignCameraAlt { get; }
@@ -69,6 +70,7 @@ namespace Movement3D.Gameplay
             CombatLookAtPosition = new(_combatLookAt);
             FloorPosition = new(_floor);
             SuckToTarget = new(_rigidbody, playerController.SuckToTargetEase);
+            DynamicSuckToTarget = new(_rigidbody, playerController.SuckToTargetEase);
             SuckToTargetAlt = new(Ease.OutSine, _floor, _rigidbody);
             AlignCamera = new(_playerObj, _orientation);
             AlignCameraAlt = new(_playerObj, _orientation);
@@ -81,6 +83,7 @@ namespace Movement3D.Gameplay
         public void Update(float deltaTime)
         {
             SuckToTarget.Update(deltaTime);
+            DynamicSuckToTarget.Update(deltaTime);
         }
     }
 

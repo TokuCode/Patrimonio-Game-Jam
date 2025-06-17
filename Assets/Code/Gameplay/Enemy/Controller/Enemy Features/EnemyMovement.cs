@@ -23,6 +23,8 @@ namespace Movement3D.Gameplay
         
         private EnemyAttributes attributes;
         private EnemyAnimator animator;
+        private EnemyResource resource;
+        private EnemyBrain brain;
         [SerializeField] private MovementType _moveType;
         public MovementType MoveType => _moveType;
         private IMoveState _moveState;
@@ -40,9 +42,12 @@ namespace Movement3D.Gameplay
         [SerializeField] private float _sampleRateRetreat;
         private RetreatMoveState _retreat;
         private Metronome updateTimer;
-        private Transform _target;
+        private bool _death;
+        [Header("Runtime")]
+        [SerializeField] private Transform _target;
         public Transform Target => _target;
-        private bool _stopped;
+        [SerializeField]private bool _stopped;
+        public bool Stopped => _stopped;
         
         [Header("Speeds")]
         [SerializeField] private float _speedWalk;
@@ -57,12 +62,16 @@ namespace Movement3D.Gameplay
             _target = null;
             SetMoveType(_moveType);
             SetMoveSpeed(_speed);
+            _death = false;
+            ResumeMovement();
         }
 
         public override void InitializeFeature(Controller controller)
         {
             base.InitializeFeature(controller);
             _dependencies.TryGetFeature(out attributes);
+            _dependencies.TryGetFeature(out resource);
+            _dependencies.TryGetFeature(out brain);
             _wander = new(_delta);
             _circulate = new(_delta);
             _chase = new();
@@ -74,6 +83,7 @@ namespace Movement3D.Gameplay
             }
             SetMoveType(_moveType);
             SetMoveSpeed(_speed);
+            resource.OnDie += () => {_death = true;};
         }
 
         public void SetTarget(Transform target = null)
@@ -85,26 +95,33 @@ namespace Movement3D.Gameplay
         {
             updateTimer.Update(Time.deltaTime);
 
-            while (updateTimer.ShouldTick() && !_stopped)
+            while (updateTimer.ShouldTick() && !_stopped && !_death)
             {
-                var position = _invoker.Position.Get();
-                bool hit = NavMesh.SamplePosition(_moveState.GetNextPosition(position, _target), out var navHit, _sampleDistance, NavMesh.AllAreas);
-                if (hit)
-                {
-                    var direction = (navHit.position - position).With(y: 0).normalized;
-                    _invoker.Destination.Execute(navHit.position);
-                    _invoker.Forward.Execute(direction);
-                }
+                SetDestination();
             }
+        }
+
+        private void SetDestination()
+        {
+            var position = _invoker.Position.Get();
+            bool hit = NavMesh.SamplePosition(_moveState.GetNextPosition(position, _target), out var navHit, _sampleDistance, NavMesh.AllAreas);
+            if (hit)
+            {
+                var direction = (navHit.position - transform.position).With(y: 0).normalized;
+                _invoker.Destination.Execute(navHit.position);
+                _invoker.Forward.Execute(direction);
+            }   
         }
 
         public void ResumeMovement()
         {
-            if(!_stopped) return;
+            if(!_stopped && !brain.IsStunned) return;
             
             _invoker.Stop.Execute(false);
             animator.SetBlend(_moveType == MovementType.Chase ? 1 : .6f);
             _stopped = false;
+            ResetMovement();
+            brain.IsStunned = false;
         }
 
         public void StopMovement()
@@ -114,6 +131,12 @@ namespace Movement3D.Gameplay
             _invoker.Stop.Execute(true);
             animator.SetBlend(0);
             _stopped = true;
+        }
+
+        public void ResetMovement()
+        {
+            if(_death) return;
+            _invoker.ResetPath.Execute();
         }
 
         public void SetMoveType(MovementType movementType)
@@ -141,6 +164,8 @@ namespace Movement3D.Gameplay
                     updateTimer.Reset(_sampleRateRetreat);
                     break;
             }
+            
+            SetDestination();
         }
 
         public void SetMoveSpeed(MovementSpeed speed)
@@ -152,12 +177,12 @@ namespace Movement3D.Gameplay
             switch (speed)
             {
                 case MovementSpeed.Run:
-                    newSpeed = _speedRun * attributes.RunSpeed;
-                    newAcceleration = _accelerationRun * attributes.RunAcceleration;
+                    newSpeed = _speedRun;
+                    newAcceleration = _accelerationRun;
                     break;
                 case MovementSpeed.Walk:
-                    newSpeed = _speedWalk * attributes.Speed;
-                    newAcceleration = _accelerationWalk * attributes.Acceleration;
+                    newSpeed = _speedWalk;
+                    newAcceleration = _accelerationWalk;
                     break;
                 case MovementSpeed.Sneak:
                     newSpeed = _speedSneak;

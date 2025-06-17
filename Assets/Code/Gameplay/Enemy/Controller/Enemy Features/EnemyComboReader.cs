@@ -56,7 +56,7 @@ namespace Movement3D.Gameplay
 
         public void ProcessInput(string signal)
         {
-            if(_locked) return;
+            if (_locked || resource.isDead) return;
 
             if(string.IsNullOrWhiteSpace(signal)) return;
             

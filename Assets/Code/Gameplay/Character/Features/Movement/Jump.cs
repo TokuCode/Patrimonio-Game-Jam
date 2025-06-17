@@ -1,3 +1,4 @@
+using Movement3D.Helpers;
 using UnityEngine;
 
 namespace Movement3D.Gameplay
@@ -13,6 +14,7 @@ namespace Movement3D.Gameplay
         private Attributes attributes;
     
         [Header("Jump Parameters")]
+        [SerializeField] private float _jumpHeight;
         [SerializeField] private float _jumpCooldown;
         [SerializeField] private float _coyoteJumpTime;
         [SerializeField] private float _movementBonus;
@@ -102,7 +104,7 @@ namespace Movement3D.Gameplay
             float multiplier = crouch.IsCrouching ? _crouchMultiplier : 1f;
     
             _invoker.Velocity.Execute(new (velocity.x, 0f, velocity.z));
-            _invoker.AddForce.Execute(new(Vector3.up, (attributes.JumpForce + bonusForce) * multiplier, ForceMode.VelocityChange));
+            _invoker.AddForce.Execute(new(Vector3.up, JumpHeight.ToForce(_jumpHeight + bonusForce) * multiplier, ForceMode.VelocityChange));
         }
     
         private void SetGravityUse()
