@@ -29,6 +29,7 @@ namespace Movement3D.Gameplay
             Collider = GetComponent<CapsuleCollider>();
             Rigidbody = GetComponent<Rigidbody>();
             NavMeshAgent = GetComponent<NavMeshAgent>();
+            NavMeshAgent.updateRotation = false;
             Coroutine = GetComponent<CoroutineRunner>();
 
             Invoker = new(this);

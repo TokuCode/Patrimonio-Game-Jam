@@ -51,7 +51,7 @@ namespace Movement3D.Gameplay
 
         private void Move(Vector2 moveDirection)
         {
-            if (_isMovementBlocked || resource.isStunned) return;
+            if (_isMovementBlocked || resource.isStunned || resource.isDead) return;
             
             Vector3 forward = _invoker.Forward.Get();
             Vector3 right = _invoker.Right.Get();

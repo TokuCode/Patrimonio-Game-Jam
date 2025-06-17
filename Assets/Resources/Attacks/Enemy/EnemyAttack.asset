@@ -15,7 +15,7 @@ MonoBehaviour:
   attackName: EnemyAttack
   attackRange: 7.5
   animationClip: {fileID: -203655887218126122, guid: ae80e10daba3aa8418f87ba82f97296a, type: 3}
-  priority: 10
+  priority: 5
   attacks:
   - bodyPartName: right-hand
     positionOffset: {x: 0, y: 0, z: 0}

@@ -57,11 +57,6 @@ namespace Movement3D.Gameplay
                 attack.MultiplierReset();
             }
 
-            _currentHit.damage *= attributes.AttackPower;
-            _currentHit.knockback *= attributes.KnockbackPower;
-            _currentHit.stunPower *= attributes.StunPower;
-            _currentHit.stunDuration *= attributes.StunDurationBoost;
-
             _timer.Start();
             gameObject.SetActive(true);
             _rigidbody.linearVelocity = _currentSpeed;
@@ -72,22 +67,23 @@ namespace Movement3D.Gameplay
             if (!_excludeTag.Contains(other.gameObject.tag) && _includeTag.Contains(other.gameObject.tag))
             {
                 var enemy = other.gameObject.GetComponent<EnemyController>();
-                if (enemy == null)
+                if (enemy != null)
                 {
-                    Reset();
-                    return;
+                    enemy.Dependencies.TryGetFeature(out EnemyResource resource);
+                    resource.Attack(new HitInfo
+                    {
+                        priority = _priority,
+                        hit = _hit,
+                        position = transform.position,
+                        direction = _direction,
+                        projectile = true,
+                        success = true,
+                        stunSuccess = true
+                    });
                 }
-
-                enemy.Dependencies.TryGetFeature(out EnemyResource resource);
-                resource.Attack(new HitInfo
-                {
-                    priority = _priority,
-                    hit = _hit,
-                    position = transform.position,
-                    projectile = true,
-                    success = true,
-                    stunSuccess = true
-                });
+                
+                other.gameObject.GetComponent<DestroyableProp>()?.Attack(_hit.damage);
+                
                 Reset();
             }
             

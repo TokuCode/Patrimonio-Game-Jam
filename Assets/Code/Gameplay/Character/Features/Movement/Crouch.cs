@@ -8,8 +8,9 @@ namespace Movement3D.Gameplay
         private Movement movement;
         private PlayerAnimator animator;
         private Resource resource;
-        
-        [Header("Extra Settings")]
+
+        [Header("Extra Settings")] 
+        [SerializeField] private bool _crounchEnabled;
         [SerializeField] private float _crouchColliderCenter;
         private float _startCrouchColliderCenter;
 
@@ -49,7 +50,7 @@ namespace Movement3D.Gameplay
 
         private void CheckCrouching(bool crouchInput)
         {
-            bool canCrouch = !movement.IsMovementBlocked && !resource.isStunned;
+            bool canCrouch = !movement.IsMovementBlocked && !resource.isStunned && _crounchEnabled;
             
             if(crouchInput && canCrouch && !_isCrouching)
                 CrouchAction();

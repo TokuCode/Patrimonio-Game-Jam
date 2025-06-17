@@ -19,19 +19,18 @@ namespace Movement3D.Gameplay
         //Cache
         private Transform _bodyPart;
         private LayerMask _enemyLayer;
-        private List<string> _excludeTag;
         private List<string> _includeTag;
         private SingleHit _hit;
         private GameObject _vfxPrefab;
         private VisualEffect _vfx;
         private bool _hasHit;
+        private GameObject _sender;
         
         public EnemyHitbox(EnemyAttack attack, EnemyAttributes attributes, ForwardHandler forward)
         {
             _playerForward = forward;
             _attack = attack;
             _attributes = attributes;
-            _excludeTag = new List<string> { attack.gameObject.tag };
             _includeTag = new List<string>(attack.Targeted);
             _enemyLayer = attack.AttackLayer;
         }
@@ -48,17 +47,14 @@ namespace Movement3D.Gameplay
             if (_timer.IsRunning && time >= _hit.delay && time <= _hit.delay + _hit.duration) CheckHit();
         }
 
-        public void Init(SingleHit hit)
+        public void Init(SingleHit hit, GameObject sender)
         {
             _hit = hit;
-            _hit.damage *= _attack.MultiplierDamage * _attributes.AttackPower;
-            _hit.knockback *= _attack.MultiplierKnockback * _attributes.KnockbackPower;
             _hit.radius *= _attack.MultiplierScale;
-            _hit.stunPower *= _attributes.StunPower;
-            _hit.stunDuration *= _attributes.StunDurationBoost;
             _vfxPrefab = hit.vfxPrefab;
             _attack._bodyPartsDictionary.TryGetValue(hit.bodyPartName, out _bodyPart);
             _hasHit = false;
+            _sender = sender;
             if(_attack.CurrentAttack.chargeAttack || _attack.CurrentAttack.defensePosture) AttackVFX();
         }
 
@@ -83,10 +79,11 @@ namespace Movement3D.Gameplay
             {
                 string tag = collider.gameObject.tag;
                 
-                if (_excludeTag.Contains(tag) || !_includeTag.Contains(tag)) continue;
+                if (collider.gameObject == _sender || !_includeTag.Contains(tag)) continue;
 
                 HitEnemy(collider.gameObject.GetComponent<PlayerController>(), position);
                 HitAlly(collider.gameObject.GetComponent<EnemyController>(), position);
+                collider.gameObject.GetComponent<DestroyableProp>()?.Attack(_hit.damage);
                 
                 hit = true;
             }
@@ -109,6 +106,7 @@ namespace Movement3D.Gameplay
                 priority = _attack.CurrentAttack.priority,
                 hit = _hit,
                 position = position,
+                direction = _playerForward.Get(),
                 projectile = false,
                 success = true,
                 stunSuccess = true
@@ -126,6 +124,7 @@ namespace Movement3D.Gameplay
                 priority = _attack.CurrentAttack.priority,
                 hit = _hit,
                 position = position,
+                direction = _playerForward.Get(),
                 projectile = false,
                 success = true,
                 stunSuccess = true
@@ -203,10 +202,10 @@ namespace Movement3D.Gameplay
             _hitboxPool = new(CreateFunc, OnGet, OnRelease, Destroy, defaultCapacity: prewarm);
         }
 
-        public EnemyHitbox GetHit(SingleHit hitInfo)
+        public EnemyHitbox GetHit(SingleHit hitInfo, GameObject sender)
         {
             var hit = _hitboxPool.Get();
-            hit.Init(hitInfo);
+            hit.Init(hitInfo, sender);
             return hit;
         }
 
@@ -230,13 +229,13 @@ namespace Movement3D.Gameplay
             _activeHitboxes.ForEach(hitbox => hitbox.FixedUpdate());
         }
 
-        public void OnStartAttack(List<SingleHit> hits)
+        public void OnStartAttack(List<SingleHit> hits, GameObject sender)
         {
             if(hits.Count == 0) return;
             
             foreach (var hit in hits)
             {
-                var hitbox = GetHit(hit);
+                var hitbox = GetHit(hit, sender);
                 _activeHitboxes.Add(hitbox);
             }
             _attack.MultiplierReset();

@@ -35,6 +35,26 @@ namespace Movement3D.Gameplay
         }
     }
 
+    public class ResetPathCommand : ICommand<bool>
+    {
+        private NavMeshAgent _agent;
+        private Transform _transform;
+
+        public ResetPathCommand(NavMeshAgent agent, Transform transform)
+        {
+            _agent = agent;
+            _transform = transform;
+        }
+
+        public void Execute(bool args = false)
+        {
+            var destination = _agent.destination;
+            _agent.Warp(_transform.position);
+            _agent.ResetPath();
+            _agent.SetDestination(destination);
+        }
+    }
+
     public class SetDestinationCommand : ICommand<Vector3>
     {
         private NavMeshAgent _agent;

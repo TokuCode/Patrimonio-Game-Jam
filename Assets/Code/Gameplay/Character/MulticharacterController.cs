@@ -14,11 +14,6 @@ namespace Movement3D.Gameplay
         private int _currentPlayerIndex;
         public event Action<PlayerController> OnSwitchCharacter;
 
-        private void OnEnable()
-        {
-            InputReader.Instance.OnSwitch += Switch;
-        }
-
         private void Start()
         {
             foreach (var player in _characters)
@@ -31,7 +26,7 @@ namespace Movement3D.Gameplay
             OnSwitchCharacter?.Invoke(_currentPlayer);
         }
 
-        private void Switch(int direction)
+       public void Switch(int direction)
         {
             if(direction == 0) return;
             

@@ -12,8 +12,13 @@ namespace Movement3D.Gameplay
         private EnemyComboReader combo;
         private EnemyAttributes attributes;
         private EnemyMovement movement;
+        private SphereCollider _worldBounds;
+        private float _worldLimit;
 
-        [Header("Health")] [SerializeField] private float _currentHealth;
+        [Header("Health")] 
+        [SerializeField] private float _maxHealth;
+        public float MaxHealth => _maxHealth;
+        [SerializeField] private float _currentHealth;
         public float CurrentHealth => _currentHealth;
         public bool isDead { get; private set; }
         public bool isInvincible { get; private set; }
@@ -30,11 +35,13 @@ namespace Movement3D.Gameplay
         public override void InitializeFeature(Controller controller)
         {
             base.InitializeFeature(controller);
+            _worldBounds = GameObject.FindGameObjectWithTag("WorldBounds").GetComponent<SphereCollider>();
+            _worldLimit = GameObject.FindGameObjectWithTag("WorldLimit").transform.position.y;
             _dependencies.TryGetFeature(out attack);
             _dependencies.TryGetFeature(out combo);
             _dependencies.TryGetFeature(out attributes);
             _dependencies.TryGetFeature(out movement);
-            _currentHealth = attributes.MaxHealth;
+            _currentHealth = _maxHealth;
             _invincibleTimer = new CountdownTimer(_invincibilityTime);
             _invincibleTimer.OnTimerStop = () => { isInvincible = false; };
             _stunTimer = new CountdownTimer(1f);
@@ -53,7 +60,7 @@ namespace Movement3D.Gameplay
         {
             if (shared is not PlayerSharedProperties playerShared) return;
 
-            playerShared.healthRatio = Mathf.Clamp01(_currentHealth / attributes.MaxHealth);
+            playerShared.healthRatio = Mathf.Clamp01(_currentHealth / _maxHealth);
             isInvincible = false;
             isStunned = false;
             _invincibleTimer.Stop();
@@ -64,14 +71,19 @@ namespace Movement3D.Gameplay
         {
             _invincibleTimer.Tick(Time.deltaTime);
             _stunTimer.Tick(Time.deltaTime);
-        }
             
-        public void BasicAttack(float damage, float multiplier = 3)
-        {
-            Damage(damage);
-            Stun(multiplier);
+            CheckOutOfBounds();
         }
 
+        private void CheckOutOfBounds()
+        {
+            var position = _invoker.Position.Get();
+            var distance = Vector3.Distance(position, _worldBounds.transform.position);
+            if (distance > _worldBounds.radius && !isDead) OnDeath();
+            
+            if(position.y < _worldLimit && isDead) EffectiveDeath();
+        }
+        
         public void Attack(HitInfo hitInfo)
         {
             if (isDead || isInvincible) return;
@@ -97,8 +109,6 @@ namespace Movement3D.Gameplay
 
             if (_currentHealth <= 0)
             {
-                isDead = true;
-                OnDie?.Invoke();
                 OnDeath();
             }
             else
@@ -107,12 +117,12 @@ namespace Movement3D.Gameplay
                 _invincibleTimer.Start();
             }
 
-            _currentHealth = Mathf.Clamp(_currentHealth, 0, attributes.MaxHealth);
+            _currentHealth = Mathf.Clamp(_currentHealth, 0, _maxHealth);
 
             var delta = new Delta
             {
                 delta = startHealth - _currentHealth,
-                newRatio = Mathf.Clamp01(_currentHealth / attributes.MaxHealth),
+                newRatio = Mathf.Clamp01(_currentHealth / _maxHealth),
             };
             if (delta.delta != 0)
             {
@@ -136,11 +146,8 @@ namespace Movement3D.Gameplay
         {
             if (!hitInfo.success) return;
 
-            Vector3 attackPoint = hitInfo.position;
-            Vector3 center = _invoker.Position.Get();
             var knockback = hitInfo.hit.knockback;
-            var direction = (center - attackPoint).With(y: 0).normalized;
-            var force = direction * knockback.x + Vector3.up * knockback.y;
+            var force = hitInfo.direction * knockback.x + Vector3.up * knockback.y;
 
             _invoker.Velocity.Execute(Vector3.zero);
             _invoker.Knockback.Execute(force);
@@ -148,9 +155,10 @@ namespace Movement3D.Gameplay
 
         public void OnDeath()
         {
+            isDead = true;
             combo.ArtificialLock();
-            movement.StopMovement();
             animator.Death();
+            OnDie?.Invoke();
         }
 
         public void EffectiveDeath()

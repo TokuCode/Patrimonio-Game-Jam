@@ -14,23 +14,21 @@ namespace Movement3D.Gameplay
         public int Agility => _agility;
         [SerializeField, Range(0, 10)] private int _force;
         public float Force => _force;
+
+        [Header("Overwrites")] 
+        [SerializeField] private float _stunResistance;
+        [SerializeField] private float _stunDurationReduction;
+        [SerializeField] private float _knockbackResistance;
+        [SerializeField] private float _damageReduction;
+        [SerializeField] private float _staminaCostReduction;
+        [SerializeField] private float _staminaRegenMultiplier;
         
-        public float MaxHealth => GlobalStats.Instance.MaxHealth(_constitution);
-        public float StunResistance => GlobalStats.Instance.StunResistance(_constitution);
-        public float StunDurationReduction => GlobalStats.Instance.StunDurationReduction(_constitution);
-        public float KnockbackResistance => GlobalStats.Instance.KnockbackResistance(_constitution);
-        public float DamageReduction => GlobalStats.Instance.DamageReduction(_constitution);
-        public float StaminaCostReduction => GlobalStats.Instance.StaminaCostReduction(_agility);
-        public float StaminaRegen => GlobalStats.Instance.StaminaRegen(_agility);
-        public float Speed => GlobalStats.Instance.Speed(_agility);
-        public float RunSpeed => GlobalStats.Instance.RunSpeed(_agility);
-        public float Acceleration => GlobalStats.Instance.Acceleration(_agility);
-        public float RunAcceleration => GlobalStats.Instance.Acceleration(_agility);
-        public float JumpForce => GlobalStats.Instance.JumpForce(_agility);
-        public float AttackPower => GlobalStats.Instance.AttackPower(_force);
-        public float KnockbackPower => GlobalStats.Instance.KnockbackPower(_force);
-        public float StunPower => GlobalStats.Instance.StunPower(_force);
-        public float StunDurationBoost => GlobalStats.Instance.StunDurationBoost(_force);
+        public float StunResistance => _stunResistance != 0 ? _stunResistance : GlobalStats.Instance.StunResistance(_constitution);
+        public float StunDurationReduction => _stunDurationReduction != 0 ? _stunDurationReduction : GlobalStats.Instance.StunDurationReduction(_constitution);
+        public float KnockbackResistance => _knockbackResistance != 0 ? _knockbackResistance : GlobalStats.Instance.KnockbackResistance(_constitution);
+        public float DamageReduction => _damageReduction != 0 ? _damageReduction : GlobalStats.Instance.DamageReduction(_constitution);
+        public float StaminaCostReduction => _staminaCostReduction != 0 ? _staminaCostReduction : GlobalStats.Instance.StaminaCostReduction(_agility);
+        public float StaminaRegen => _staminaRegenMultiplier != 0 ? _staminaRegenMultiplier : GlobalStats.Instance.StaminaRegen(_agility);
 
         public override void InitializeFeature(Controller controller)
         {

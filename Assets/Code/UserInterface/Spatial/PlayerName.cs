@@ -16,7 +16,6 @@ namespace Movement3D.UserInterface
 
         private void Start()
         {
-            
             if(_player is EnemyController enemy) _nameText.text = enemy.Name;
         }
     }

@@ -2,6 +2,7 @@
 
 namespace Movement3D.Gameplay
 {
+    [DefaultExecutionOrder(-50)]
     public class EnemyAnimator : MonoBehaviour
     {
         [SerializeField] private EnemyController _player;

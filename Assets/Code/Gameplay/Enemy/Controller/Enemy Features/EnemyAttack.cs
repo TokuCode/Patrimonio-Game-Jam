@@ -144,7 +144,7 @@ namespace Movement3D.Gameplay
 
             _isAttacking = true;
             _currentAttack = attack;
-            _hitboxPool.OnStartAttack(attack.attacks);
+            _hitboxPool.OnStartAttack(attack.attacks, gameObject);
             tick = 0;
             CheckTargetForSnap(attack);
             animator.AttackOverride(attack);
@@ -313,7 +313,7 @@ namespace Movement3D.Gameplay
             bool chain = _currentAttack.chainEffects && tick == _currentAttack.chainTick;
 
             projectile.Init(shootPosition, _lastDirectionToTarget != Vector3.zero ? _lastDirectionToTarget : forward,
-                _currentAttack.priority, this, attributes, chain);
+                _currentAttack.priority, this, attributes, chain, gameObject);
         }
 
         private Vector3 GetTargetOutPosition(PlayerController target)

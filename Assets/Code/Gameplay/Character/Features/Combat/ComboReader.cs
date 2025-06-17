@@ -22,6 +22,7 @@ namespace Movement3D.Gameplay
         public FullAttack currentAttack {get; private set;}
         private bool _locked;
         private int _counter;
+        private bool _isDead;
 
         [Header("Combo Settings")]
         [SerializeField] private string _graphName;
@@ -37,6 +38,7 @@ namespace Movement3D.Gameplay
             _dependencies.TryGetFeature(out resource);
             attack.OnStartAttack += OnStartAttack;
             attack.OnEndAttack += OnEndAttack;
+            resource.OnDie += () => { _isDead = true; };
             
             _graph = Resources.Load<ScriptableObject>($"ComboGraph/{_graphName}") as ComboContainer;
         }
@@ -46,6 +48,7 @@ namespace Movement3D.Gameplay
             _locked = false;
             _chainTimer.Stop();
             ClearAttackCache();
+            _isDead = false;
             if(bufferSignal != null) bufferSignal.Clear();
         }
 
@@ -56,7 +59,7 @@ namespace Movement3D.Gameplay
 
         public override void Apply(ref InputPayload @event)
         {
-            if(_locked || (!resource.AbleToAttack && !attack.Waiting)) return;
+            if(_locked || _isDead || (!resource.AbleToAttack && !attack.Waiting)) return;
 
             string signal = @event.Signal;
             if(string.IsNullOrWhiteSpace(signal)) return;

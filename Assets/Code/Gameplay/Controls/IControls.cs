@@ -8,6 +8,7 @@ namespace Movement3D.Gameplay
         bool Jump { get; }
         bool Run { get; }
         bool Crouch { get; }
+        int Switch { get; }
     }
     
     public struct InputPayload
@@ -17,6 +18,7 @@ namespace Movement3D.Gameplay
         public bool Run;
         public bool Crouch;
         public string Signal;
+        public int Switch;
         
         public UpdateContext Context;
     }
