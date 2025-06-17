@@ -13,7 +13,7 @@ namespace Movement3D.Beat
         
         private AudioSource _audioSource;
 
-        private void Start() => _audioSource = AudioManager.Instance.GetAudio("GameplayMusic").source;
+        private void Start() => _audioSource = AudioManager.Instance.GetAudio("Tambor").source;
 
         private void Update()
         {
@@ -24,7 +24,7 @@ namespace Movement3D.Beat
             }
         }
 
-        public bool WasOnBeat(float hitSteps = 1f)
+        public bool WasOnBeat(float hitSteps = .26f)
         {
             int sampleRate = _audioSource.clip.frequency;
             int currentSample = _audioSource.timeSamples;
