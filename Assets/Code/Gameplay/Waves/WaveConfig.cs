@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace Movement3D.Gameplay
 {
-    [CreateAssetMenu(fileName = "New WaveConfig", menuName = "WaveConfig")]
-    public class WaveConfig : ScriptableObject
+    [System.Serializable]
+    public class WaveConfig
     {
         public List<WavePhase> phases;
         public float postWaveRestTime;
